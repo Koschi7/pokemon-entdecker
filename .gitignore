@@ -1,11 +1,23 @@
-__pycache__/
-*.pyc
-*.pyo
-venv/
-.venv/
-*.db
-*.sqlite
+# Dependencies and build output
+node_modules/
+dist/
+
+# Pipeline cache and generated assets – never commit (Pokémon artwork and cries belong to
+# Nintendo / Creatures / GAME FREAK / The Pokémon Company; voice clips are generated locally)
+.cache/
+generated/
+
+# Local secrets (GEMINI_API_KEY)
 .env
+
+# Local experiments
+scratch/
+
+# Leftovers of the old v2 Python app in existing checkouts
+app/
+venv/
+__pycache__/
 config.env
+*.db
+
 .DS_Store
-app/static/audio/

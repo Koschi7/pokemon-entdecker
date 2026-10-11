@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@import "@fontsource-variable/grandstander";
+
+/* Fire HD 8 quer: im Kinder-Browser ~350 px Höhe, im Vollbild ~600 px abzüglich der Android-Leisten */
+@custom-variant short (@media (max-height: 640px));
+
+@theme {
+  --font-display: "Grandstander Variable", ui-rounded, "Arial Rounded MT Bold", sans-serif;
+  --color-binder: #161a33;
+  --color-ink: #10132a;
+  --color-dex: #e3350d;
+  --color-dex-dark: #9e2208;
+  --color-lens: #3fa9f5;
+  --color-sun: #ffcb05;
+}
+
+html, body, #root { height: 100%; }
+
+/* Im Vollbild blendet Android bei jeder Berührung Status- und Navigationsleiste ÜBER die Seite ein,
+   ohne dass sich der Viewport ändert. Diese Ränder bleiben deshalb frei. */
+:root { --safe-top: 0px; --safe-bottom: 0px; --app-h: calc(100dvh - var(--safe-top) - var(--safe-bottom)); }
+:root:fullscreen { --safe-top: 28px; --safe-bottom: 52px; }
+
+.app-frame { position: fixed; inset: var(--safe-top) 0 var(--safe-bottom) 0; }
+
+body {
+  margin: 0;
+  font-family: var(--font-display);
+  color: white;
+  /* Sammelalbum: Punkteraster auf Mitternachtsblau */
+  background:
+    radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.07) 1px, transparent 0) 0 0 / 22px 22px,
+    radial-gradient(120% 90% at 75% 0%, #2c3275 0%, var(--color-binder) 55%, #0c0e20 100%);
+  background-color: var(--color-binder);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+img { -webkit-user-drag: none; }
+button { cursor: pointer; }
+
+/* Sammelkarte: Verlauf aus den Typfarben, oben links ein Lichtfleck */
+.card-face {
+  background:
+    radial-gradient(120% 80% at 25% 10%, rgb(255 255 255 / 0.5), transparent 55%),
+    linear-gradient(155deg, var(--type-a), color-mix(in oklab, var(--type-b, var(--type-a)) 78%, black));
+}
+
+/* Holo-Streifen, der beim Antippen über die Karte läuft (keine Blend-Modes: Fire-Tablets sind schwach) */
+.foil { position: relative; overflow: hidden; }
+.foil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.45) 45%, rgb(255 236 150 / 0.3) 52%, transparent 65%);
+  background-size: 300% 100%;
+  background-position: 120% 0;
+}
+.foil:active::after, .foil[data-shine="true"]::after { animation: sheen 0.7s ease-out; }
+@keyframes sheen { from { background-position: 120% 0; } to { background-position: -40% 0; } }
+
+/* Pokédex-Gehäuse */
+.dex-shell {
+  background: linear-gradient(90deg, var(--color-dex) 0%, #f04a21 60%, var(--color-dex-dark) 100%);
+  box-shadow: inset -6px 0 0 rgb(0 0 0 / 0.18), 6px 0 24px rgb(0 0 0 / 0.35);
+}
+
+.lens {
+  background: radial-gradient(circle at 35% 30%, #e6f6ff 0 12%, #7cc8ff 13% 30%, var(--color-lens) 31% 62%, #1667b8 63%);
+  box-shadow: 0 0 0 5px #fff, 0 0 0 8px rgb(0 0 0 / 0.25);
+}
+
+.chunky { box-shadow: 0 5px 0 rgb(0 0 0 / 0.35); }
+.chunky:active { transform: translateY(3px); box-shadow: 0 2px 0 rgb(0 0 0 / 0.35); }
+
+.scroll-area { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* Kacheln: kein content-visibility (geschätzte Höhen ließen die Liste beim Scrollen springen)
+   und kein Verschieben beim Berühren – beim Scrollen über eine Kachel soll nichts rutschen. */
+.tile.chunky:active { transform: none; box-shadow: 0 5px 0 rgb(0 0 0 / 0.35); filter: brightness(1.08); }
+
+/* Karten umdrehen */
+.flip-scene { perspective: 1600px; }
+.flip-inner { transform-style: preserve-3d; }
+.flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+
+/* Entwicklung: Pokémon wird zur leuchtenden Silhouette */
+.evolve-glow { filter: brightness(0) invert(1) drop-shadow(0 0 18px #fff) drop-shadow(0 0 36px var(--color-sun)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .foil::after { animation: none !important; }
+}

@@ -1,0 +1,59 @@
+name: Deploy
+
+# Deploys the app shell (dist/) only. Data, images and audio are generated locally and uploaded
+# separately (see infra/DEPLOY.md) – they are never part of the repository.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # pnpm version comes from "packageManager" in package.json
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${DEPLOY_HOST#*@}" >> ~/.ssh/known_hosts
+
+      - name: Upload app
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          # --delete never touches excluded paths, so data/, img/ and audio/ on the server stay as they are
+          rsync -az --delete \
+            --exclude /data/ --exclude /img/ --exclude /audio/ \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            dist/ "$DEPLOY_HOST:/var/www/pokemon-entdecker/"
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_HOST" \
+            'chown -R www-data:www-data /var/www/pokemon-entdecker'

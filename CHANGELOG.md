@@ -6,6 +6,38 @@
 
 ## Deutsch
 
+### 2026-10-11
+
+**v3: Neubau als statische Offline-PWA**
+- Statische Offline-PWA (Vite, React, TypeScript, Tailwind) statt FastAPI/HTMX/SQLite – auf dem Server läuft kein eigener Dienst mehr
+- Neue Pipeline: alle 1.025 Pokémon plus 57 Regionalformen, vollständige Entwicklungsbäume, WebP-Bilder und Rufe
+- Neue Stimme: Gemini („Puck“) mit korrekter deutscher Aussprache – das alte edge-tts schickte `en-US`, deshalb wurden die Namen englisch vorgelesen
+- Pokémon-Bilder, Rufe und Sprachclips liegen nie im Repo, sie werden lokal erzeugt und separat hochgeladen
+
+**Neue Funktionen**
+- Sammelkarten zum Umdrehen
+- Größen-Bühne: Pokémon und Entwicklungskette maßstabsgetreu neben der eigenen Familie, mit gesprochenen Vergleichen („… ist größer als du!“)
+- Entwickeln-Animation, auch bei verzweigten Entwicklungen wie Evoli
+- Shiny-Umschalter und seltene Shiny-Überraschung
+- Regionalformen (Alola, Galar, Hisui, Paldea)
+- „Mein Team“ mit 6 Plätzen ersetzt die unbegrenzten Favoriten
+- Namen und Körpergrößen der Familie bleiben auf dem Tablet und werden nie hochgeladen
+- Quiz „Wer ist das Pokémon?“: Silhouette erraten, drei Bilder zur Auswahl, Sterne für die Runde
+- Sound-Effekte, direkt im Browser erzeugt (Antippen, Karte umdrehen, Poké Ball, Shiny, Entwicklung, Quiz) – abschaltbar in den Eltern-Einstellungen
+
+**Layout**
+- Kompaktes Layout für den Amazon-Kids-Browser (ca. 350 px Höhe)
+- Vollbild mit freien Rändern für die Android-Systemleisten
+
+**Behobene Fehler aus v2**
+- Der Service Worker hat CSS/JS nie aktualisiert – Updates kamen nicht auf den Tablets an
+- Audio wurde nie offline gecacht (HTTP-206-Range-Antworten); Clips werden jetzt als ganze Dateien geladen
+- Verzweigte Entwicklungen wurden als Kette angezeigt
+- Der öffentliche, ungeschützte Einstellungs-/Neuladen-Endpunkt (Reseed) ist weg
+
+**Projekt**
+- Alter v2-Code entfernt, README auf Englisch, MIT-Lizenz (nur für den Code), ESLint, GitHub Actions (CI und manueller Deploy)
+
 ### 2026-04-11
 
 **Font Awesome Icons**
@@ -95,6 +127,38 @@
 ---
 
 ## English
+
+### 2026-10-11
+
+**v3: Rebuilt as a static offline PWA**
+- Static offline PWA (Vite, React, TypeScript, Tailwind) instead of FastAPI/HTMX/SQLite – no service runs on the server anymore
+- New pipeline: all 1,025 Pokémon plus 57 regional forms, full evolution trees, WebP artwork and cries
+- New voice: Gemini ("Puck") with correct German pronunciation – the old edge-tts setup sent `en-US`, so names were read in English
+- Pokémon artwork, cries and voice clips are never in the repo; they are generated locally and uploaded separately
+
+**New features**
+- Collectible flip cards
+- Size stage: the Pokémon and its evolution line to scale next to your own family, with spoken comparisons ("… ist größer als du!")
+- Evolve animation, including branching evolutions such as Eevee
+- Shiny toggle and a rare shiny surprise
+- Regional forms (Alola, Galar, Hisui, Paldea)
+- "My Team" with 6 slots replaces unlimited favorites
+- Family names and heights stay on the tablet and are never uploaded
+- Quiz "Who's that Pokémon?": guess the silhouette, three pictures to choose from, stars for the session
+- Sound effects synthesized in the browser (tap, card flip, Poké Ball, shiny, evolution, quiz) – can be switched off in the parent settings
+
+**Layout**
+- Compact layout for the Amazon Kids browser (about 350 px tall)
+- Fullscreen with reserved margins for the Android system bars
+
+**Fixed v2 bugs**
+- The service worker never updated CSS/JS – updates never reached the tablets
+- Audio was never cached for offline use (HTTP 206 range responses); clips are now fetched as whole files
+- Branching evolutions were shown as a chain
+- The public, unauthenticated settings/reseed endpoint is gone
+
+**Project**
+- Removed the old v2 code, English README, MIT license (code only), ESLint, GitHub Actions (CI and manual deploy)
 
 ### 2026-04-11
 
