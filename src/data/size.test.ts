@@ -6,11 +6,16 @@ describe('formatHeight', () => {
     expect(formatHeight(0.6)).toBe('60 cm');
     expect(formatHeight(0.1)).toBe('10 cm');
   });
-  it('nutzt Meter mit Komma ab einem Meter', () => {
-    expect(formatHeight(1.7)).toBe('1,7 m');
-    expect(formatHeight(1.75)).toBe('1,75 m');
+  it('schreibt Meter und Zentimeter wie gesprochen, ohne Komma', () => {
+    expect(formatHeight(1.1)).toBe('1 m 10 cm');
+    expect(formatHeight(1.7)).toBe('1 m 70 cm');
+    expect(formatHeight(1.05)).toBe('1 m 5 cm');
     expect(formatHeight(2)).toBe('2 m');
-    expect(formatHeight(14.5)).toBe('14,5 m');
+    expect(formatHeight(14.5)).toBe('14 m 50 cm');
+  });
+  it('rundet auf ganze Zentimeter', () => {
+    expect(formatHeight(1.999)).toBe('2 m');
+    expect(formatHeight(0.995)).toBe('1 m');
   });
 });
 

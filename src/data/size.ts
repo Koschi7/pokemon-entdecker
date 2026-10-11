@@ -1,7 +1,13 @@
-/** "1,70 m" ab einem Meter, darunter "60 cm" – so lesen Eltern es vor. */
+/**
+ * So, wie man es spricht: "1 m 10 cm", darunter "60 cm", glatte Meter "2 m".
+ * Kein Komma – "1,1 m" lesen Kinder als "ein Meter eins".
+ */
 export function formatHeight(meters: number): string {
-  if (meters < 1) return `${Math.round(meters * 100)} cm`;
-  return `${meters.toFixed(2).replace('.', ',').replace(/,00$/, '').replace(/(,\d)0$/, '$1')} m`;
+  const cm = Math.round(meters * 100);
+  if (cm < 100) return `${cm} cm`;
+  const m = Math.floor(cm / 100);
+  const rest = cm % 100;
+  return rest ? `${m} m ${rest} cm` : `${m} m`;
 }
 
 /** Pixel pro Meter, damit das Größte (plus etwas Luft) genau auf die Bühne passt. */

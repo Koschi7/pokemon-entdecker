@@ -22,7 +22,7 @@ function HeightStepper({ value, onChange }: { value: number; onChange: (v: numbe
     <div className="flex shrink-0 items-center gap-2">
       <button onClick={() => set(value - 0.05)} className={small}>−5</button>
       <button onClick={() => set(value - 0.01)} className={big}>−</button>
-      <span className="w-20 text-center text-xl font-black tabular-nums">{formatHeight(value)}</span>
+      <span className="w-28 text-center text-xl font-black tabular-nums">{formatHeight(value)}</span>
       <button onClick={() => set(value + 0.01)} className={big}>+</button>
       <button onClick={() => set(value + 0.05)} className={small}>+5</button>
     </div>
