@@ -236,4 +236,37 @@ export const sfx = {
   wrong: () => play(0.35, (k) => {
     tone(k, { type: 'triangle', freq: 349, to: 262, dur: 0.32, gain: 0.55, attack: 0.04 });
   }),
+
+  /** Ein Leben (Pokéball) weg: kleines „Plopp“ beim Aufspringen, dann ein Hauch nach unten. */
+  lifeLost: () => play(0.5, (k) => {
+    tone(k, { type: 'triangle', freq: 700, to: 1100, dur: 0.06, gain: 0.5, attack: 0.002 });
+    whoosh(k, { from: 2400, to: 500, at: 0.05, dur: 0.3, gain: 0.9 });
+    tone(k, { freq: 520, to: 260, at: 0.08, dur: 0.35, gain: 0.35 });
+  }),
+
+  /** Spiel vorbei: drei freundliche Töne abwärts, kein Trauermarsch. */
+  gameOver: () => play(0.9, (k) => {
+    [G5, E5, C5].forEach((freq, i) => bell(k, freq, i * 0.18, 0.4, 0.5));
+  }),
+
+  /** Neuer Rekord: kurzes Funkeln nach oben. */
+  newBest: () => play(0.7, (k) => {
+    [C6, E6, G6, C7].forEach((freq, i) => bell(k, freq, i * 0.08, 0.35, 0.4 - i * 0.05));
+  }),
+
+  /** 100 geschafft: kleine Fanfare – Auftakt, Dur-Akkord, Glitzer obendrauf (~2 s). */
+  victory: () => play(2.2, (k) => {
+    bell(k, G5, 0, 0.14, 0.6);
+    bell(k, G5, 0.15, 0.14, 0.6);
+    bell(k, G5, 0.3, 0.14, 0.6);
+    bell(k, C6, 0.46, 0.9, 0.7);
+    tone(k, { type: 'triangle', freq: E5, at: 0.46, dur: 1.2, gain: 0.35, attack: 0.01 });
+    tone(k, { type: 'triangle', freq: G5, at: 0.46, dur: 1.2, gain: 0.3, attack: 0.01 });
+    tone(k, { type: 'triangle', freq: C5, at: 0.46, dur: 1.3, gain: 0.3, attack: 0.01 });
+    [C6, E6, G6, C7, E7, G6, C7, E7].forEach((freq, i) => {
+      tone(k, { freq, at: 0.7 + i * 0.09, dur: 0.25, gain: 0.16, detune: -6 });
+      tone(k, { freq, at: 0.7 + i * 0.09, dur: 0.25, gain: 0.16, detune: 6 });
+    });
+    whoosh(k, { from: 800, to: 5000, at: 0.4, dur: 0.8, gain: 0.6 });
+  }),
 };

@@ -17,8 +17,10 @@ This is a non-commercial fan project. See [Legal](#legal) before you use it.
 - **Shiny.** A toggle shows the shiny artwork, and every card has a small chance of opening as a shiny surprise.
 - **Regional forms.** Alolan, Galarian, Hisuian and Paldean forms. Evolving keeps the region (Alolan Vulpix → Alolan Ninetales).
 - **My Team.** Catch up to 6 Pokémon with the Poké Ball button.
-- **Quiz "Wer ist das Pokémon?".** A silhouette and three pictures to choose from; a correct answer reveals the Pokémon with sparkles and its name. Distractors always have a different color, so even four-year-olds have a fair chance.
-- **Sound effects.** Taps, card flips, the Poké Ball, shinies and evolutions have small sounds, synthesized with the Web Audio API (no audio files, no licenses, works offline). Parents can switch them off.
+- **Games.** Two games, each with 3 lives (Poké Balls), a score up to 100, a record saved on the tablet, and a celebration with trophy and confetti at 100:
+  - **"Wer ist das Pokémon?"**: a silhouette and three pictures to choose from. Distractors always have a different color, so even four-year-olds have a fair chance. A wrong tap costs a Poké Ball, but the child may keep looking.
+  - **"Wer ist größer?"**: two Pokémon shown at the same size, so you have to know it rather than see it. After the tap, both grow or shrink to their real scale with their heights. Pairs get closer in size as the score rises.
+- **Sound effects.** Taps, card flips, the Poké Ball, shinies, evolutions and the games have small sounds, synthesized with the Web Audio API (no audio files, no licenses, works offline). Parents can switch them off.
 - **Parent settings.** Hold the blue Pokédex lens for 3 seconds to open them. Parents can set family names and heights, toggle sound effects and download everything for offline use (about 80 MB).
 - **Privacy.** Family names and heights are stored only on the device (`localStorage`) and never uploaded. Voice lines refer to roles ("du", "dein Bruder"), so children's names are never sent to the speech service. There are no accounts and no tracking.
 - **Language.** The voice is German. UI labels exist in German and English (`src/data/labels.ts`).

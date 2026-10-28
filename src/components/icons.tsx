@@ -79,13 +79,27 @@ export function Ruler({ className }: P) {
   );
 }
 
-/** Quiz: dunkle Silhouette mit Fragezeichen. */
-export function Mystery({ className }: P) {
+/** Spiele: freundlicher Controller. */
+export function Controller({ className }: P) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden>
-      <circle cx="32" cy="32" r="28" fill="#1d1d2b" stroke="#fff" strokeWidth="4" />
-      <path d="M24 25a8 8 0 1 1 12 7c-3 2-4 3-4 7" fill="none" stroke="#ffcb05" strokeWidth="6" strokeLinecap="round" />
-      <circle cx="32" cy="47" r="3.6" fill="#ffcb05" />
+      <path d="M18 18h28c8 0 13 7 14 17l1 7c1 7-6 10-10 5l-6-7H19l-6 7c-4 5-11 2-10-5l1-7c1-10 6-17 14-17Z" fill="#fff" stroke="#1d1d2b" strokeWidth="4" strokeLinejoin="round" />
+      <path d="M20 26v12M14 32h12" stroke="#1d1d2b" strokeWidth="5" strokeLinecap="round" />
+      <circle cx="44" cy="28" r="4" fill="#e3350d" />
+      <circle cx="51" cy="35" r="4" fill="#ffcb05" />
+    </svg>
+  );
+}
+
+/** Pokal für den Rekord und die 100. */
+export function Trophy({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden>
+      <path d="M14 10h36v6c0 13-7 22-18 22S14 29 14 16Z" fill="#ffcb05" stroke="#b8860b" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M14 14H6c0 9 4 14 11 15M50 14h8c0 9-4 14-11 15" fill="none" stroke="#b8860b" strokeWidth="4" strokeLinecap="round" />
+      <path d="M27 38h10l2 10H25Z" fill="#ffcb05" stroke="#b8860b" strokeWidth="3" strokeLinejoin="round" />
+      <rect x="18" y="48" width="28" height="8" rx="3" fill="#e3350d" stroke="#9e2208" strokeWidth="3" />
+      <path d="M24 16c0 6 3 11 7 13" fill="none" stroke="#fff6" strokeWidth="4" strokeLinecap="round" />
     </svg>
   );
 }

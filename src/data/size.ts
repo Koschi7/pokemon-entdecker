@@ -15,3 +15,6 @@ export function pixelsPerMeter(heights: number[], stageHeightPx: number, headroo
   const tallest = Math.max(...heights, 0.1);
   return (stageHeightPx * headroom) / tallest;
 }
+
+/** Breite im Verhältnis zur Höhe – aus dem sichtbaren Umriss eines Artworks [x, y, Breite, Höhe]. */
+export const aspectOf = (box: [number, number, number, number]) => box[2] / box[3];

@@ -4,7 +4,7 @@ import type { View } from '../data/filters';
 import type { UiStrings } from '../data/labels';
 import { asset } from '../data/assets';
 import { sfx } from '../lib/sfx';
-import { Mystery, Palette, Pokeball, SizeSort } from './icons';
+import { Controller, Palette, Pokeball, SizeSort } from './icons';
 
 type Props = {
   view: View;
@@ -101,8 +101,8 @@ export function Rail({ view, onView, onSettings, teamBump, ui }: Props) {
         <ModeButton active={view.mode === 'team'} label={ui.team} onClick={() => onView({ mode: 'team' })} bump={teamBump}>
           <Pokeball className="size-full" />
         </ModeButton>
-        <ModeButton active={view.mode === 'quiz'} label={ui.quiz} onClick={() => onView({ mode: 'quiz' })}>
-          <Mystery className="size-full" />
+        <ModeButton active={['games', 'quiz', 'bigger'].includes(view.mode)} label={ui.games} onClick={() => onView({ mode: 'games' })}>
+          <Controller className="size-full" />
         </ModeButton>
       </div>
       <div className="mt-auto">

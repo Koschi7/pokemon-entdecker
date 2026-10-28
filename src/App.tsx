@@ -14,7 +14,9 @@ import { FilterColumn } from './components/FilterColumn';
 import { GenBar } from './components/GenBar';
 import { Grid } from './components/Grid';
 import { Pokeball } from './components/icons';
-import { Quiz } from './components/Quiz';
+import { Bigger } from './components/games/Bigger';
+import { GamePicker } from './components/games/GamePicker';
+import { Quiz } from './components/games/Quiz';
 import { Rail } from './components/Rail';
 import { SettingsSheet } from './components/SettingsSheet';
 
@@ -54,7 +56,7 @@ export function App() {
 
   const byId = useMemo(() => new Map<number, PokemonData>(data?.pokemon.map((p) => [p.id, p]) ?? []), [data]);
   const list = useMemo(() => (data ? visiblePokemon(data.pokemon, view, team) : []), [data, view, team]);
-  const quizPool = useMemo(() => (data ? data.pokemon.filter((p) => view.gen === 0 || p.gen === view.gen) : []), [data, view.gen]);
+  const gamePool = useMemo(() => (data ? data.pokemon.filter((p) => view.gen === 0 || p.gen === view.gen) : []), [data, view.gen]);
   const teamPokemon = useMemo(() => team.map((id) => byId.get(id)).filter((p): p is PokemonData => !!p), [team, byId]);
 
   const { people, family } = familyView(settings, t.ui);
@@ -88,11 +90,15 @@ export function App() {
   return (
     <div className="app-frame flex overflow-hidden">
       <Rail view={view} onView={onView} onSettings={() => setSettingsOpen(true)} teamBump={teamBump} ui={t.ui} />
-      {view.mode !== 'quiz' && <FilterColumn view={view} onView={onView} team={teamPokemon} onSelect={open} t={t} />}
+      {['color', 'type', 'team'].includes(view.mode) && <FilterColumn view={view} onView={onView} team={teamPokemon} onSelect={open} t={t} />}
       <main className="flex min-w-0 flex-1 flex-col">
-        {view.mode !== 'team' && <GenBar gen={view.gen} onGen={(gen) => onView({ gen })} ui={t.ui} />}
-        {view.mode === 'quiz' ? (
-          <Quiz pool={quizPool} ui={t.ui} />
+        {!['team', 'quiz', 'bigger'].includes(view.mode) && <GenBar gen={view.gen} onGen={(gen) => onView({ gen })} ui={t.ui} />}
+        {view.mode === 'games' ? (
+          <GamePicker ui={t.ui} onPick={(mode) => onView({ mode })} />
+        ) : view.mode === 'quiz' ? (
+          <Quiz pool={gamePool} ui={t.ui} onExit={() => onView({ mode: 'games' })} />
+        ) : view.mode === 'bigger' ? (
+          <Bigger pool={gamePool} bbox={bbox} ui={t.ui} onExit={() => onView({ mode: 'games' })} />
         ) : (
           <Grid
             list={list}

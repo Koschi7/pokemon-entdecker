@@ -1,7 +1,7 @@
 import type { PokemonData } from './types';
 
 export type View = {
-  mode: 'color' | 'type' | 'team' | 'quiz';
+  mode: 'color' | 'type' | 'team' | 'games' | 'quiz' | 'bigger'; // games = Spielauswahl
   color: string | null;
   type: string | null;
   gen: number; // 0 = alle

@@ -6,6 +6,17 @@
 
 ## Deutsch
 
+### 2026-10-28
+
+**Spiele**
+- Neuer Knopf „Spiele“ in der Leiste mit Spielauswahl
+- Beide Spiele mit 3 Leben (Pokébälle), Punkten bis 100 und Rekord pro Tablet; bei 100 Siegerfeier mit Pokal, Konfetti und Fanfare
+- Quiz „Wer ist das Pokémon?“: Punkt nur beim ersten Versuch, ein Fehltipp kostet einen Pokéball
+- Neues Spiel „Wer ist größer?“: zwei Pokémon gleich groß gezoomt, nach dem Tipp wachsen beide auf den echten Maßstab; je höher der Punktestand, desto knapper die Größen
+
+**Sprache**
+- Alle 1.025 Pokémon und 57 Regionalformen sind jetzt vertont, dazu die Sätze für die Spiele
+
 ### 2026-10-11
 
 **v3: Neubau als statische Offline-PWA**
@@ -127,6 +138,17 @@
 ---
 
 ## English
+
+### 2026-10-28
+
+**Games**
+- New "Games" button in the rail with a game picker
+- Both games have 3 lives (Poké Balls), a score up to 100 and a record per tablet; reaching 100 triggers a celebration with trophy, confetti and fanfare
+- Quiz "Wer ist das Pokémon?": a point only on the first try; a wrong tap costs a Poké Ball
+- New game "Wer ist größer?": two Pokémon zoomed to the same size; after the tap both grow or shrink to their real scale; the higher the score, the closer the sizes
+
+**Voice**
+- All 1,025 Pokémon and 57 regional forms are now voiced, plus the game lines
 
 ### 2026-10-11
 

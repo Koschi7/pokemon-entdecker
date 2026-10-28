@@ -1,4 +1,4 @@
-// Sprachbausteine: Größenvergleiche ([Name] + Baustein, z. B. "Glurak" + "ist größer als du!") und Quiz.
+// Sprachbausteine: Größenvergleiche ([Name] + Baustein, z. B. "Glurak" + "ist größer als du!") und Spiele.
 // Die Bausteine werden einmal mit derselben Stimme erzeugt (pipeline/tts.ts, Schlüssel "frag/<key>").
 
 export const FRAGMENTS = {
@@ -33,6 +33,13 @@ export const FRAGMENTS = {
   quizWho: 'Wer ist das Pokémon?',
   quizRight: 'Richtig!',
   quizTryAgain: 'Fast! Probier es nochmal!',
+  // Spiel "Wer ist größer?"
+  biggerWho: 'Wer ist größer?',
+  biggerWrong: 'Oh nein! Das andere ist größer.',
+  // Für beide Spiele
+  newBest: 'Neuer Rekord!',
+  gameOver: 'Super gespielt! Gleich nochmal?',
+  victory: 'Wahnsinn! Hundert Stück! Du bist ein echter Pokémon-Meister!',
 } as const;
 
 export type FragmentKey = keyof typeof FRAGMENTS;

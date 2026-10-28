@@ -96,3 +96,27 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .foil::after { animation: none !important; }
 }
+
+/* Spiele: Konfetti und Lichtstrahlen bei der 100 (CSS statt JS – läuft flüssig auf dem Fire-Tablet) */
+.confetti {
+  position: absolute;
+  top: -16px;
+  width: 10px;
+  height: 14px;
+  animation: confetti-fall linear infinite;
+}
+@keyframes confetti-fall {
+  from { transform: translate3d(0, -20px, 0) rotate(0deg); }
+  to { transform: translate3d(40px, 110vh, 0) rotate(720deg); }
+}
+.victory-rays {
+  position: absolute;
+  inset: -50%;
+  background: repeating-conic-gradient(from 0deg, rgb(255 203 5 / 0.16) 0deg 10deg, transparent 10deg 24deg);
+  animation: rays-spin 18s linear infinite;
+}
+@keyframes rays-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti, .victory-rays { animation: none; }
+}

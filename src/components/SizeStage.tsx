@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { asset } from '../data/assets';
-import { formatHeight, pixelsPerMeter } from '../data/size';
+import { aspectOf, formatHeight, pixelsPerMeter } from '../data/size';
+import { CroppedArt } from './CroppedArt';
 import { Person } from './icons';
 
 export type StageFigure =
@@ -21,7 +21,7 @@ const LABEL_SPACE = 48; // Platz unter den Figuren für Name + Größe
 const GAP = 14;
 const GROUP_GAP = 28;
 const MIN_PX = 14; // winzige Pokémon bleiben antippbar
-const aspect = (f: StageFigure) => (f.kind === 'person' ? 0.42 : f.box[2] / f.box[3]);
+const aspect = (f: StageFigure) => (f.kind === 'person' ? 0.42 : aspectOf(f.box));
 
 /** Größen-Bühne: Familie und Entwicklungskette maßstabsgetreu nebeneinander – passt immer ohne Scrollen. */
 export function SizeStage({ people, levels, shiny, onTap }: Props) {
@@ -56,14 +56,7 @@ export function SizeStage({ people, levels, shiny, onTap }: Props) {
         {f.kind === 'person' ? (
           <Person child={f.child} color={f.color} className="block" style={{ height: h, width: w }} />
         ) : (
-          <span className="relative block overflow-hidden drop-shadow-[0_6px_0_rgb(0_0_0/0.25)]" style={{ height: h, width: w }}>
-            <img
-              src={asset.art(f.assetId, shiny && current)}
-              alt=""
-              className="absolute max-w-none"
-              style={{ width: h / f.box[3], height: h / f.box[3], left: (-f.box[0] * h) / f.box[3], top: (-f.box[1] * h) / f.box[3] }}
-            />
-          </span>
+          <CroppedArt id={f.assetId} box={f.box} height={h} shiny={shiny && current} className="drop-shadow-[0_6px_0_rgb(0_0_0/0.25)]" />
         )}
         <span className={`mt-1 h-1.5 w-[70%] min-w-3 rounded-full ${current ? 'bg-sun shadow-[0_0_12px_var(--color-sun)]' : 'bg-black/25'}`} />
         <span className={`mt-1 max-w-[120px] truncate text-[13px] leading-tight font-extrabold ${current ? 'text-sun' : 'text-white'}`}>
