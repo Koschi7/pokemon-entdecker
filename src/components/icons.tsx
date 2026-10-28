@@ -104,6 +104,32 @@ export function Trophy({ className }: P) {
   );
 }
 
+/** Fragezeichen, Weiter-Pfeil und Haken als SVG: Schriftzeichen sitzen in runden Knöpfen nie ganz mittig. */
+export function Question({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round">
+      <path d="M22 24a10 10 0 1 1 15 8.7c-3 1.8-5 3.6-5 7.3v1" />
+      <circle cx="32" cy="51" r="1" strokeWidth="9" />
+    </svg>
+  );
+}
+
+export function ArrowRight({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 32h34M35 18l14 14-14 14" />
+    </svg>
+  );
+}
+
+export function Check({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 33l11 11 21-24" />
+    </svg>
+  );
+}
+
 export function Close({ className }: P) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round">

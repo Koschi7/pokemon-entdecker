@@ -8,6 +8,7 @@ import type { BoundingBoxes, PokemonData } from '../../data/types';
 import { play } from '../../lib/audio';
 import { sfx } from '../../lib/sfx';
 import { CroppedArt } from '../CroppedArt';
+import { ArrowRight, Check, Close, Question } from '../icons';
 import { SparkleBurst } from '../DetailCard';
 import { GameOverOverlay, VictoryOverlay } from './Celebration';
 import { GameHud } from './GameHud';
@@ -141,9 +142,9 @@ export function Bigger({ pool, bbox, ui, onExit }: Props) {
               {revealed && isPicked && (
                 <motion.span
                   initial={{ scale: 0 }} animate={{ scale: 1 }}
-                  className={`absolute top-2 right-2 grid size-11 place-items-center rounded-full text-2xl font-black text-white ${isWinner ? 'bg-[#2fae4f]' : 'bg-[#e0453a]'}`}
+                  className={`absolute top-2 right-2 grid size-11 place-items-center rounded-full text-white ${isWinner ? 'bg-[#2fae4f]' : 'bg-[#e0453a]'}`}
                 >
-                  {isWinner ? '✓' : '✗'}
+                  {isWinner ? <Check className="size-7" /> : <Close className="size-6" />}
                 </motion.span>
               )}
               {revealed && isWinner && (
@@ -166,17 +167,17 @@ export function Bigger({ pool, bbox, ui, onExit }: Props) {
                 onClick={() => { sfx.tap(); next(); }}
                 aria-label={ui.next}
                 initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                className="chunky pointer-events-auto grid size-16 place-items-center rounded-full border-4 border-white bg-sun text-3xl font-black text-ink short:size-14"
+                className="chunky pointer-events-auto grid size-16 place-items-center rounded-full border-4 border-white bg-sun text-ink short:size-14"
               >
-                →
+                <ArrowRight className="size-9 short:size-8" />
               </motion.button>
             ) : !revealed ? (
               <motion.span
                 key="ask"
                 initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                className="grid size-14 place-items-center rounded-full border-4 border-white bg-ink text-3xl font-black text-sun short:size-12"
+                className="grid size-14 place-items-center rounded-full border-4 border-white bg-ink text-sun short:size-12"
               >
-                ?
+                <Question className="size-8 short:size-7" />
               </motion.span>
             ) : null}
           </AnimatePresence>
