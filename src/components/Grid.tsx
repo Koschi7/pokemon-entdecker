@@ -4,7 +4,7 @@ import { asset } from '../data/assets';
 import type { PokemonData } from '../data/types';
 import { sfx } from '../lib/sfx';
 import { load, save } from '../lib/storage';
-import { Pokeball } from './icons';
+import { MegaStone, Pokeball } from './icons';
 
 const Tile = memo(function Tile({ p, inTeam, onSelect }: { p: PokemonData; inTeam: boolean; onSelect: (id: number) => void }) {
   return (
@@ -17,7 +17,10 @@ const Tile = memo(function Tile({ p, inTeam, onSelect }: { p: PokemonData; inTea
       style={typeVars(p.types)}
     >
       <span className="absolute top-1 left-2 text-[11px] font-extrabold text-white/85 drop-shadow">#{String(p.id).padStart(3, '0')}</span>
-      {inTeam && <Pokeball className="absolute top-1.5 right-1.5 size-5 drop-shadow" />}
+      <span className="absolute top-1.5 right-1.5 flex gap-0.5">
+        {p.megas && <MegaStone className="size-5 drop-shadow" />}
+        {inTeam && <Pokeball className="size-5 drop-shadow" />}
+      </span>
       <img
         src={asset.thumb(p.id)}
         alt=""

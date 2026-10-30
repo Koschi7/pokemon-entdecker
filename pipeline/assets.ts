@@ -99,7 +99,7 @@ async function main() {
   const { pokemon } = JSON.parse(await readFile(`${OUT}/pokemon.json`, 'utf8')) as { pokemon: Pokemon[] };
   const jobs: Job[] = pokemon.flatMap((p) => [
     { id: String(p.id), art: p.art, cry: p.cry },
-    ...p.forms.map((f) => ({ id: f.key, art: f.art, cry: f.cry })),
+    ...[...p.forms, ...p.megas].map((f) => ({ id: f.key, art: f.art, cry: f.cry })),
   ]);
 
   let done = 0;

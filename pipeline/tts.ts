@@ -36,7 +36,7 @@ function utterances(pokemon: Pokemon[]): Utterance[] {
   // Bausteine für die Größenvergleiche zuerst – ein einziger Stapel
   const list: Utterance[] = Object.entries(FRAGMENTS).map(([key, text]) => ({ key: `frag/${key}`, kind: 'frag', text }));
   for (const p of pokemon) {
-    for (const [id, nameDe] of [[String(p.id), p.name.de], ...p.forms.map((f) => [f.key, f.name.de])] as const) {
+    for (const [id, nameDe] of [[String(p.id), p.name.de], ...[...p.forms, ...p.megas].map((f) => [f.key, f.name.de])] as const) {
       const say = spoken(nameDe);
       list.push({ key: `satz/${id}`, kind: 'satz', text: `Das ist ${say}!` });
       list.push({ key: `name/${id}`, kind: 'name', text: `${say}!` });

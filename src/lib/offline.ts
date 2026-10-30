@@ -8,7 +8,7 @@ import { load, save } from './storage';
 type Progress = (done: number, total: number) => void;
 
 function allIds(data: AppData): Array<string | number> {
-  return data.pokemon.flatMap((p) => [p.id, ...(p.forms ?? []).map((f) => f.key)]);
+  return data.pokemon.flatMap((p) => [p.id, ...[...(p.forms ?? []), ...(p.megas ?? [])].map((f) => f.key)]);
 }
 
 async function fetchAll(urls: string[], onProgress?: Progress, parallel = 4): Promise<number> {

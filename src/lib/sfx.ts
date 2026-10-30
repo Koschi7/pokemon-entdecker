@@ -254,6 +254,20 @@ export const sfx = {
     [C6, E6, G6, C7].forEach((freq, i) => bell(k, freq, i * 0.08, 0.35, 0.4 - i * 0.05));
   }),
 
+  /** Mega-Entwicklung (1,8 s): tiefes Anschwellen mit Tremolo, Funkel-Schübe, am Ende ein großer Akkord. */
+  megaEvolve: () => play(2.3, (k) => {
+    const rise = 1.6;
+    tone(k, { type: 'triangle', freq: 110, to: 440, dur: rise, gain: 0.45, attack: rise * 0.9 });
+    tone(k, { type: 'sawtooth', freq: 220, to: 880, dur: rise, gain: 0.08, attack: rise * 0.9, detune: 7 });
+    whoosh(k, { from: 300, to: 4000, dur: rise, attack: rise * 0.8, gain: 1.2, q: 1.2 });
+    [0.35, 0.75, 1.15].forEach((at, i) =>
+      [C6, E6, G6].forEach((freq, j) => tone(k, { freq: freq * (1 + i * 0.12), at: at + j * 0.05, dur: 0.18, gain: 0.12, attack: 0.003 })));
+    bell(k, C5, 1.75, 0.6, 0.32);
+    tone(k, { type: 'triangle', freq: E5, at: 1.75, dur: 0.6, gain: 0.22, attack: 0.004 });
+    tone(k, { type: 'triangle', freq: G5, at: 1.75, dur: 0.6, gain: 0.22, attack: 0.004 });
+    bell(k, C6, 1.75, 0.5, 0.25);
+  }),
+
   /** 100 geschafft: kleine Fanfare – Auftakt, Dur-Akkord, Glitzer obendrauf (~2 s). */
   victory: () => play(2.2, (k) => {
     bell(k, G5, 0, 0.14, 0.6);

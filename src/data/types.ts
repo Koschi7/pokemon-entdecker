@@ -9,6 +9,7 @@ export type FormData = {
   types: string[];
   height: number; // Meter
   weight: number; // Kilogramm
+  noShiny?: true; // kein Shiny-Artwork vorhanden
 };
 
 export type PokemonData = {
@@ -23,6 +24,7 @@ export type PokemonData = {
   chain: number | null;
   legendary?: true;
   forms?: FormData[];
+  megas?: FormData[]; // Mega-Entwicklungen (region "mega") und Proto-Formen ("primal")
 };
 
 export type ChainNode = { id: number; to: ChainNode[] };

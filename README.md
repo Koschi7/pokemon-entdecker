@@ -16,6 +16,7 @@ This is a non-commercial fan project. See [Legal](#legal) before you use it.
 - **Evolution trees.** Full evolution families, including branches (e.g. Eevee). An evolve button plays a glow-and-reveal animation, and for branching evolutions the child picks the target.
 - **Shiny.** A toggle shows the shiny artwork, and every card has a small chance of opening as a shiny surprise.
 - **Regional forms.** Alolan, Galarian, Hisuian and Paldean forms. Evolving keeps the region (Alolan Vulpix → Alolan Ninetales).
+- **Mega Evolution.** 99 Mega and Primal forms, including the new ones from Legends Z-A. A Mega button with a rainbow animation; for Pokémon with several Megas (Charizard X/Y) the child picks one. Tiles show a Mega stone badge.
 - **My Team.** Catch up to 6 Pokémon with the Poké Ball button.
 - **Games.** Two games, each with 3 lives (Poké Balls), a score up to 100, a record saved on the tablet, and a celebration with trophy and confetti at 100:
   - **"Wer ist das Pokémon?"**: a silhouette and three pictures to choose from. Distractors always have a different color, so even four-year-olds have a fair chance. A wrong tap costs a Poké Ball, but the child may keep looking.

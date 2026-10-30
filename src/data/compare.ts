@@ -40,6 +40,8 @@ export const FRAGMENTS = {
   newBest: 'Neuer Rekord!',
   gameOver: 'Super gespielt! Gleich nochmal?',
   victory: 'Wahnsinn! Hundert Stück! Du bist ein echter Pokémon-Meister!',
+  // Mega-Entwicklung
+  megaEvolve: 'Mega-Entwicklung!',
 } as const;
 
 export type FragmentKey = keyof typeof FRAGMENTS;

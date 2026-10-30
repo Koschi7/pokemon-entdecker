@@ -6,6 +6,13 @@
 
 ## Deutsch
 
+### 2026-10-30
+
+**Mega-Entwicklungen**
+- 99 Mega- und Proto-Formen, auch die neuen aus Legends Z-A, mit Artwork, Shiny (wo vorhanden), Ruf, Typen, Größe und Stimme
+- Mega-Knopf auf der Karte mit Regenbogen-Animation und „Mega-Entwicklung!“; bei mehreren Megas (Glurak X/Y) wählt das Kind, ein zweiter Tipp verwandelt zurück
+- Mega-Symbol auf den Kacheln von Pokémon mit Mega-Form
+
 ### 2026-10-28
 
 **Spiele**
@@ -138,6 +145,13 @@
 ---
 
 ## English
+
+### 2026-10-30
+
+**Mega Evolution**
+- 99 Mega and Primal forms, including the new ones from Legends Z-A, with artwork, shiny (where available), cry, types, height and voice
+- Mega button on the card with a rainbow animation and "Mega-Entwicklung!"; with several Megas (Charizard X/Y) the child picks one, a second tap reverts
+- Mega stone badge on tiles of Pokémon that have a Mega form
 
 ### 2026-10-28
 

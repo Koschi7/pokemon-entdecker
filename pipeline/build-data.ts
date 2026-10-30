@@ -33,12 +33,14 @@ export type Pokemon = {
   art: Art;
   cry: string | null;
   forms: Form[];
+  megas: Form[]; // Mega-Entwicklungen und Proto-Formen (Kyogre, Groudon)
 };
 export type ChainNode = { id: number; to: ChainNode[] };
 
 const ROMAN: Record<string, number> = { i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9 };
 const REGION_FORM = /-(alola|galar|hisui|paldea)(-|$)/;
 const SKIP_FORM = /-(zen|cap|totem|gmax|mega)/;
+const MEGA_FORM = /-mega(-[xyz])?$|-primal$/;
 const REGION_DE: Record<string, string> = { alola: 'Alola', galar: 'Galar', hisui: 'Hisui', paldea: 'Paldea' };
 // Die PokéAPI liefert für die drei Paldea-Tauros denselben deutschen Namen.
 const FORM_NAME_DE: Record<string, string> = {
@@ -71,6 +73,20 @@ async function buildForm(ref: { name: string; url: string }, speciesName: { de: 
   return { key: ref.name, region, name: { de, en }, ...base(p) };
 }
 
+/** Mega-Form (oder Proto-Form): Name aus der PokéAPI, sonst "Mega-Glurak X" bzw. "Proto-Kyogre". */
+async function buildMega(ref: { name: string; url: string }, speciesName: { de: string; en: string }): Promise<Form> {
+  const p = await get<PokemonData>(ref.url);
+  const primal = ref.name.endsWith('-primal');
+  const suffix = ref.name.match(/-mega-([xyz])$/)?.[1]?.toUpperCase();
+  const formRef = p.forms[0];
+  const form = formRef ? await get<PokemonForm>(formRef.url) : null;
+  const fallbackDe = primal ? `Proto-${speciesName.de}` : `Mega-${speciesName.de}${suffix ? ` ${suffix}` : ''}`;
+  const fallbackEn = primal ? `Primal ${speciesName.en}` : `Mega ${speciesName.en}${suffix ? ` ${suffix}` : ''}`;
+  const de = (form && localized(form.names, 'de')) ?? fallbackDe;
+  const en = (form && localized(form.names, 'en')) ?? fallbackEn;
+  return { key: ref.name, region: primal ? 'primal' : 'mega', name: { de, en }, ...base(p) };
+}
+
 function toNode(link: ChainLink): ChainNode {
   return { id: idFromUrl(link.species.url), to: link.evolves_to.map(toNode) };
 }
@@ -90,6 +106,9 @@ async function main() {
       .map((v) => v.pokemon)
       .filter((v) => REGION_FORM.test(v.name) && !SKIP_FORM.test(v.name));
     const forms = await Promise.all(formRefs.map((f) => buildForm(f, name)));
+    const megaRefs = s.varieties.map((v) => v.pokemon).filter((v) => MEGA_FORM.test(v.name));
+    // Ohne offizielles Artwork (ganz neue Megas) lieber weglassen als ein leeres Bild zeigen
+    const megas = (await Promise.all(megaRefs.map((m) => buildMega(m, name)))).filter((m) => m.art.normal);
     done += 1;
     if (done % 100 === 0) console.log(`  ${done}/${list.results.length}`);
     return {
@@ -103,6 +122,7 @@ async function main() {
       evolvesFrom: s.evolves_from_species ? idFromUrl(s.evolves_from_species.url) : null,
       ...base(p),
       forms,
+      megas,
     };
   }));
   pokemon.sort((a, b) => a.id - b.id);
@@ -117,30 +137,34 @@ async function main() {
   await writeFile('generated/pokemon.json', JSON.stringify({ generatedAt: new Date().toISOString(), pokemon, chains }));
 
   // Schlanke Fassung für die App (ohne Quell-URLs; Dateipfade folgen einer festen Konvention)
+  const toAppForm = (f: Form) => ({
+    key: f.key, region: f.region, name: f.name.de, nameEn: f.name.en, types: f.types, height: f.height, weight: f.weight,
+    ...(f.art.shiny ? {} : { noShiny: true as const }), // ganz neue Megas haben noch kein Shiny-Artwork
+  });
   const app: AppData = {
     version: new Date().toISOString().slice(0, 10),
     pokemon: pokemon.map((p) => ({
       id: p.id, name: p.name.de, nameEn: p.name.en, gen: p.generation, color: p.color, types: p.types,
       height: p.height, weight: p.weight, chain: p.chain,
       ...(p.legendary ? { legendary: true as const } : {}),
-      ...(p.forms.length ? {
-        forms: p.forms.map((f) => ({
-          key: f.key, region: f.region, name: f.name.de, nameEn: f.name.en, types: f.types, height: f.height, weight: f.weight,
-        })),
-      } : {}),
+      ...(p.forms.length ? { forms: p.forms.map(toAppForm) } : {}),
+      ...(p.megas.length ? { megas: p.megas.map(toAppForm) } : {}),
     })),
     chains,
   };
   await writeFile('generated/data/pokemon.json', JSON.stringify(app));
 
   const forms = pokemon.flatMap((p) => p.forms);
+  const megas = pokemon.flatMap((p) => p.megas);
   const missing = {
     art: pokemon.filter((p) => !p.art.normal).map((p) => p.slug),
     shiny: pokemon.filter((p) => !p.art.shiny).map((p) => p.slug),
     cry: pokemon.filter((p) => !p.cry).map((p) => p.slug),
     formShiny: forms.filter((f) => !f.art.shiny).map((f) => f.key),
+    megaShiny: megas.filter((f) => !f.art.shiny).map((f) => f.key),
+    megaCry: megas.filter((f) => !f.cry).map((f) => f.key),
   };
-  console.log(`fertig: ${pokemon.length} Pokémon, ${forms.length} Regionalformen, ${chainIds.length} Entwicklungsketten`);
+  console.log(`fertig: ${pokemon.length} Pokémon, ${forms.length} Regionalformen, ${megas.length} Mega-/Proto-Formen, ${chainIds.length} Entwicklungsketten`);
   console.log('fehlt:', JSON.stringify(missing));
 }
 

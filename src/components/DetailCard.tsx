@@ -8,7 +8,7 @@ import { compareFragments, type Family } from '../data/compare';
 import { play, playSequence } from '../lib/audio';
 import { sfx } from '../lib/sfx';
 import type { StagePerson } from '../family';
-import { Close, Evolve, Flip, Globe, Pokeball, Ruler, Sparkles, Speaker } from './icons';
+import { Close, Evolve, Flip, Globe, MegaStone, Pokeball, Ruler, Sparkles, Speaker } from './icons';
 import { SizeStage, type StageFigure } from './SizeStage';
 
 export type Selection = { id: number; form: string | null; nonce: number };
@@ -30,6 +30,7 @@ type Props = {
 const SHINY_CHANCE = 1 / 20;
 const rollShiny = () => Math.random() < SHINY_CHANCE; // wie in Pokémon Go: selten, aber möglich
 const GLOW_MS = 1400;
+const MEGA_MS = 1800; // Mega-Entwicklung: länger und bunter als die normale
 
 function ActionButton({ icon, label, onClick, active = false, tone = 'bg-white/10', shake = 0 }: {
   icon: React.ReactNode; label: string; onClick: () => void; active?: boolean; tone?: string; shake?: number;
@@ -74,10 +75,41 @@ export function SparkleBurst({ burst }: { burst: number }) {
   );
 }
 
+/** Zwei Regenbogen-Ringe, die während der Mega-Entwicklung um das Pokémon wachsen. */
+function MegaRings() {
+  return (
+    <div className="pointer-events-none absolute inset-0 grid place-items-center" aria-hidden>
+      {[0, 0.6].map((delay) => (
+        <motion.svg
+          key={delay}
+          viewBox="0 0 100 100"
+          className="absolute h-[80%] w-auto"
+          initial={{ scale: 0.3, rotate: 0, opacity: 0 }}
+          animate={{ scale: [0.3, 1.25], rotate: 300, opacity: [0, 1, 0] }}
+          transition={{ duration: 1.3, delay, ease: 'easeOut' }}
+        >
+          <defs>
+            <linearGradient id={`mega-ring-${delay}`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#ff4fd8" />
+              <stop offset="0.35" stopColor="#ffcb05" />
+              <stop offset="0.65" stopColor="#4fd2ff" />
+              <stop offset="1" stopColor="#8b5cf6" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="44" fill="none" stroke={`url(#mega-ring-${delay})`} strokeWidth="5" strokeDasharray="18 7" />
+        </motion.svg>
+      ))}
+    </div>
+  );
+}
+
 export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, inTeam, onToggleTeam, people, family, t }: Props) {
   const { ui, typeName } = t;
   const pokemon = byId.get(selection.id)!;
-  const form = pokemon.forms?.find((f) => f.key === selection.form) ?? null;
+  const megas = pokemon.megas ?? [];
+  // Gezeigte Variante: Regionalform oder Mega-/Proto-Form (beide über selection.form)
+  const form = [...(pokemon.forms ?? []), ...megas].find((f) => f.key === selection.form) ?? null;
+  const isMega = !!form && megas.includes(form);
   const shown = form ?? pokemon;
   const assetId = form?.key ?? pokemon.id;
   const chain = pokemon.chain !== null ? data.chains[pokemon.chain] : undefined;
@@ -87,10 +119,12 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
   // Die Karte wird bei jedem Öffnen neu aufgebaut: dann entscheidet sich, ob ein Shiny überrascht
   const [surprise] = useState(rollShiny);
   const [flipped, setFlipped] = useState(false);
-  const [shiny, setShiny] = useState(surprise);
+  const [shinyWanted, setShiny] = useState(surprise);
+  const canShiny = !form?.noShiny; // ganz neue Megas haben noch kein Shiny-Artwork
+  const shiny = shinyWanted && canShiny;
   const [burst, setBurst] = useState(surprise ? 1 : 0);
-  const [evolving, setEvolving] = useState<'glow' | 'reveal' | null>(null);
-  const [picker, setPicker] = useState(false);
+  const [evolving, setEvolving] = useState<'glow' | 'mega' | 'reveal' | null>(null);
+  const [picker, setPicker] = useState<'evolve' | 'mega' | null>(null);
   const [teamShake, setTeamShake] = useState(0);
 
   // Keine Sprache beim Öffnen – gesprochen wird erst, wenn das Kind auf Name oder Bild tippt
@@ -102,7 +136,7 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
   const jumpTo = (id: number) => {
     const lucky = rollShiny();
     setFlipped(false);
-    setPicker(false);
+    setPicker(null);
     setShiny(lucky);
     if (lucky) {
       setBurst((b) => b + 1);
@@ -113,7 +147,7 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
 
   const evolveTo = (target: number) => {
     if (evolving) return; // zweiter Tipp während des Leuchtens
-    setPicker(false);
+    setPicker(null);
     setEvolving('glow');
     sfx.evolve(); // dauert so lange wie das Leuchten
     // Regionalform bleibt erhalten: Alola-Vulpix wird zu Alola-Vulnona
@@ -132,7 +166,37 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
     if (next.length === 1) evolveTo(next[0]!);
     else {
       sfx.tap();
-      setPicker((v) => !v);
+      setPicker((v) => (v === 'evolve' ? null : 'evolve'));
+    }
+  };
+
+  /** Mega-Entwicklung: Regenbogen-Aura, "Mega-Entwicklung!", dann die Mega-Form. */
+  const megaEvolveTo = (key: string) => {
+    if (evolving) return;
+    setPicker(null);
+    setEvolving('mega');
+    sfx.megaEvolve();
+    play(asset.fragment('megaEvolve'));
+    window.setTimeout(() => {
+      onSelection({ ...selection, form: key });
+      setEvolving('reveal');
+      setBurst((b) => b + 1);
+      play(asset.sentence(key));
+      window.setTimeout(() => setEvolving(null), 600);
+    }, MEGA_MS);
+  };
+
+  const onMega = () => {
+    if (evolving) return;
+    if (isMega) {
+      // zurückverwandeln
+      sfx.release();
+      onSelection({ ...selection, form: null });
+      play(asset.sentence(pokemon.id));
+    } else if (megas.length === 1) megaEvolveTo(megas[0]!.key);
+    else {
+      sfx.tap();
+      setPicker((v) => (v === 'mega' ? null : 'mega'));
     }
   };
 
@@ -204,38 +268,52 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
           >
             <section className="card-face foil relative grid min-h-0 place-items-center" data-shine={burst > 0}>
               <span className="absolute top-3 left-4 text-lg font-black text-white/85 drop-shadow">#{String(pokemon.id).padStart(3, '0')}</span>
-              {form && <span className="absolute top-3 right-4 rounded-full bg-black/30 px-3 py-1 text-sm font-extrabold">{form.region.toUpperCase()}</span>}
+              {form && (
+                <span className={`absolute top-3 right-4 rounded-full px-3 py-1 text-sm font-extrabold ${isMega ? 'mega-badge' : 'bg-black/30'}`}>
+                  {form.region === 'primal' ? 'PROTO' : form.region.toUpperCase()}
+                </span>
+              )}
               {shiny && <Sparkles className="absolute top-12 left-4 size-8 text-sun drop-shadow-[0_0_8px_white]" />}
               <AnimatePresence mode="popLayout">
                 <motion.img
                   key={`${assetId}-${shiny}`}
                   src={asset.art(assetId, shiny)}
                   alt={shown.name}
-                  className={`absolute inset-0 m-auto h-[84%] w-[92%] object-contain drop-shadow-[0_10px_0_rgb(0_0_0/0.22)] ${evolving === 'glow' ? 'evolve-glow' : ''}`}
+                  className={`absolute inset-0 m-auto h-[84%] w-[92%] object-contain drop-shadow-[0_10px_0_rgb(0_0_0/0.22)] ${evolving === 'glow' ? 'evolve-glow' : evolving === 'mega' ? 'mega-glow' : ''}`}
                   initial={{ scale: evolving === 'reveal' ? 1.25 : 0.9, opacity: 0 }}
                   animate={evolving === 'glow'
                     ? { scale: [1, 1.08, 0.94, 1.12, 1], opacity: 1, transition: { duration: GLOW_MS / 1000, ease: 'easeInOut' } }
-                    : { scale: 1, opacity: 1 }}
+                    : evolving === 'mega'
+                      ? { scale: [1, 0.92, 1.1, 0.95, 1.18, 1.05], rotate: [0, -3, 3, -2, 2, 0], opacity: 1, transition: { duration: MEGA_MS / 1000, ease: 'easeInOut' } }
+                      : { scale: 1, rotate: 0, opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ type: 'spring', stiffness: 220, damping: 18 }}
                   onClick={() => play(asset.sentence(assetId))}
                 />
               </AnimatePresence>
+              {evolving === 'mega' && <MegaRings />}
               <SparkleBurst burst={burst} />
 
-              {/* Verzweigte Entwicklung: Ziel auswählen */}
+              {/* Auswahl: verzweigte Entwicklung (Evoli) oder mehrere Megas (Glurak X/Y) */}
               <AnimatePresence>
                 {picker && (
                   <motion.div
                     className="absolute inset-x-3 bottom-3 flex flex-wrap justify-center gap-2 rounded-3xl bg-ink/85 p-3"
                     initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
                   >
-                    {next.map((id) => (
-                      <button key={id} onClick={() => evolveTo(id)} aria-label={byId.get(id)?.name}
-                        className="chunky size-16 rounded-full bg-white/90 p-1">
-                        <img src={asset.thumb(id)} alt="" className="size-full object-contain" />
-                      </button>
-                    ))}
+                    {picker === 'evolve'
+                      ? next.map((id) => (
+                        <button key={id} onClick={() => evolveTo(id)} aria-label={byId.get(id)?.name}
+                          className="chunky size-16 rounded-full bg-white/90 p-1">
+                          <img src={asset.thumb(id)} alt="" className="size-full object-contain" />
+                        </button>
+                      ))
+                      : megas.map((m) => (
+                        <button key={m.key} onClick={() => megaEvolveTo(m.key)} aria-label={m.name}
+                          className="chunky mega-badge size-16 rounded-full p-1">
+                          <img src={asset.thumb(m.key)} alt="" className="size-full object-contain" />
+                        </button>
+                      ))}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -270,12 +348,18 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
               )}
               <div className="mt-auto grid grid-cols-3 gap-2.5 short:gap-1.5">
                 <ActionButton icon={<Speaker className="size-full" />} label={ui.cry} onClick={() => play(asset.cry(assetId))} />
-                <ActionButton
-                  icon={<Sparkles className="size-full" />} label={ui.shiny} active={shiny}
-                  onClick={() => { setShiny((s) => !s); setBurst((b) => b + 1); sfx.shiny(); }}
-                />
+                {canShiny && (
+                  <ActionButton
+                    icon={<Sparkles className="size-full" />} label={ui.shiny} active={shiny}
+                    onClick={() => { setShiny((s) => !s); setBurst((b) => b + 1); sfx.shiny(); }}
+                  />
+                )}
                 {!!pokemon.forms?.length && (
-                  <ActionButton icon={<Globe className="size-full" />} label={ui.forms} active={!!form} onClick={cycleForm} />
+                  <ActionButton icon={<Globe className="size-full" />} label={ui.forms} active={!!form && !isMega} onClick={cycleForm} />
+                )}
+                {megas.length > 0 && (
+                  <ActionButton icon={<MegaStone className="size-full" />} label={ui.mega} active={isMega || picker === 'mega'}
+                    tone="mega-badge" onClick={onMega} />
                 )}
                 <ActionButton
                   icon={<Pokeball className="size-full" />}
@@ -285,7 +369,7 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
                   onClick={toggleTeam}
                 />
                 {next.length > 0 && (
-                  <ActionButton icon={<Evolve className="size-full" />} label={ui.evolve} active={picker} tone="bg-[#5b3fd6]" onClick={onEvolve} />
+                  <ActionButton icon={<Evolve className="size-full" />} label={ui.evolve} active={picker === 'evolve'} tone="bg-[#5b3fd6]" onClick={onEvolve} />
                 )}
                 <ActionButton icon={<Ruler className="size-full" />} label={ui.size} tone="bg-[#1f8a70]" onClick={() => { setFlipped(true); sfx.flip(); }} />
               </div>

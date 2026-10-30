@@ -11,7 +11,7 @@ async function main() {
   const manifest = JSON.parse(await readFile('generated/audio/de/manifest.json', 'utf8').catch(() => '{}')) as Record<string, unknown>;
   const rows: Row[] = pokemon.flatMap((p) => [
     { id: String(p.id), gen: p.generation, name: p.name.de },
-    ...p.forms.map((f) => ({ id: f.key, gen: p.generation, name: f.name.de })),
+    ...[...p.forms, ...p.megas].map((f) => ({ id: f.key, gen: p.generation, name: f.name.de })),
   ]).map((r) => ({
     ...r,
     say: PRONUNCIATION[r.name] ?? null,

@@ -130,6 +130,25 @@ export function Check({ className }: P) {
   );
 }
 
+/** Mega-Stein: Regenbogen-Kugel mit heller Doppelhelix. */
+export function MegaStone({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden>
+      <defs>
+        <linearGradient id="mega-stone" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ff4fd8" />
+          <stop offset="0.35" stopColor="#ffcb05" />
+          <stop offset="0.65" stopColor="#4fd2ff" />
+          <stop offset="1" stopColor="#8b5cf6" />
+        </linearGradient>
+      </defs>
+      <circle cx="32" cy="32" r="27" fill="url(#mega-stone)" stroke="#fff" strokeWidth="4" />
+      <path d="M23 15c18 9-0 25 18 34M41 15c-18 9 0 25-18 34" fill="none" stroke="#fff" strokeWidth="4.5" strokeLinecap="round" />
+      <circle cx="24" cy="22" r="3.5" fill="#fff" opacity=".7" />
+    </svg>
+  );
+}
+
 export function Close({ className }: P) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round">
