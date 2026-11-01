@@ -2,7 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
-import { hydrate } from './lib/storage';
+import { hydrate, load } from './lib/storage';
+import { defaultSettings } from './settings';
 import './styles.css';
 
 // Service Worker mit Auto-Update: Die App bleibt im Kinder-Browser oft tagelang offen. Deshalb nicht nur
@@ -25,15 +26,24 @@ registerSW({
 // Cache der alten App (v2) aufräumen – deren Service Worker wird durch unseren ersetzt.
 if ('caches' in window) void caches.delete('pokemon-entdecker-v1');
 
-// Der Kinder-Browser zeigt Tab- und Adressleiste. Beim Antippen außerhalb des Vollbilds (erster Start,
-// oder nach der Zurück-Taste) Vollbild anfordern – aber höchstens alle 3 Sekunden, damit die Höhe nicht
-// zwischen ~350 und ~600 px hin- und herspringen kann. Klappt es nicht, passiert nichts.
+// Der Kinder-Browser zeigt Tab- und Adressleiste. Beim Antippen außerhalb des Vollbilds Vollbild
+// anfordern (abschaltbar in den Eltern-Einstellungen). Hat der Browser das Vollbild gerade verlassen
+// (Zurück-Geste, Tastatur, …), erst nach einer halben Minute wieder – sonst springt die Höhe ständig
+// zwischen ~350 und ~600 px hin und her. Während getippt wird (Suche) nie.
+const REENTER_AFTER_EXIT_MS = 30_000;
 let lastFullscreenChange = 0;
-document.addEventListener('fullscreenchange', () => { lastFullscreenChange = Date.now(); });
+let lastFullscreenExit = 0;
+document.addEventListener('fullscreenchange', () => {
+  lastFullscreenChange = Date.now();
+  if (!document.fullscreenElement) lastFullscreenExit = lastFullscreenChange;
+});
 document.addEventListener('pointerup', () => {
   const root = document.documentElement;
-  if (document.fullscreenElement || !root.requestFullscreen || Date.now() - lastFullscreenChange < 3000) return;
-  lastFullscreenChange = Date.now();
+  const now = Date.now();
+  if (document.fullscreenElement || !root.requestFullscreen || !load('settings', defaultSettings).fullscreen) return;
+  if (now - lastFullscreenChange < 3000 || now - lastFullscreenExit < REENTER_AFTER_EXIT_MS) return;
+  if (document.activeElement instanceof HTMLInputElement) return;
+  lastFullscreenChange = now;
   root.requestFullscreen().catch(() => {});
 });
 

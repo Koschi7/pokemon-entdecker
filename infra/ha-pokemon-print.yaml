@@ -1,0 +1,52 @@
+# Drucken vom Kinder-Tablet über Home Assistant – Vorlage für die eigene HA-Instanz.
+#
+# Weg: App (Druck-Code) → POST /api/print auf dem Server → nginx prüft den Code und reicht an den
+# HA-Webhook weiter (infra/nginx-pokemon-print.conf.example) → Automation unten → shell_command →
+# IPP-Druckauftrag (fertig erzeugt von pipeline/printsheet.py, liegt unter /print/<key>.ipp) direkt an
+# den Drucker. Der HP Officejet Pro 8600 nimmt image/jpeg per IPP an, CUPS ist nicht nötig.
+
+# ── 1. configuration.yaml (YAML-only, danach HA neu starten) ─────────────────────────────────────
+shell_command:
+  # $1 = Bild-Schlüssel (Pokédex-Nummer oder Form), $2 = Drucker-IP
+  pokemon_ausmalbild_drucken: >-
+    sh -c 'curl -sf --max-time 30 "https://pokemon.familie-kosmol.de/print/$1.ipp"
+    | curl -sf --max-time 90 -H "Content-Type: application/ipp" --data-binary @- -o /dev/null
+    "http://$2:631/ipp/printer"' pokemon {{ key }} {{ printer }}
+
+# ── 2. Zähler (UI-Helfer): counter.pokemon_ausmalbilder_heute, Minimum 0, Schritt 1 ─────────────
+
+# ── 3. Automation (UI oder API) ─────────────────────────────────────────────────────────────────
+# alias: "Pokémon Entdecker: Ausmalbild drucken"
+# mode: queued
+# max: 5
+# variables:
+#   printer_ip: "{{ state_attr('device_tracker.hpea2997', 'ip') | default('', true) }}"  # IP aus UniFi
+# triggers:
+#   - trigger: webhook
+#     webhook_id: pokemon-druck-<zufällig>   # geheim, steht nur hier und im nginx-Snippet
+#     allowed_methods: [POST]
+#     local_only: false                       # kommt über den Cloudflare-Tunnel
+#     id: print
+#   - trigger: time
+#     at: "00:00:00"
+#     id: reset
+# actions:
+#   - choose:
+#       - conditions: [{condition: trigger, id: reset}]
+#         sequence: [{action: counter.reset, target: {entity_id: counter.pokemon_ausmalbilder_heute}}]
+#       - conditions:
+#           - {condition: trigger, id: print}
+#           - {condition: time, after: "07:00:00", before: "19:00:00"}
+#           - {condition: numeric_state, entity_id: counter.pokemon_ausmalbilder_heute, below: 10}
+#           - condition: template
+#             value_template: >-
+#               {{ (trigger.json.key | default('') | string) is match('^[a-z0-9-]{1,40}$')
+#                  and printer_ip is match('^[0-9.]{7,15}$') }}
+#         sequence:
+#           - {action: counter.increment, target: {entity_id: counter.pokemon_ausmalbilder_heute}}
+#           - action: shell_command.pokemon_ausmalbild_drucken
+#             data: {key: "{{ trigger.json.key }}", printer: "{{ printer_ip }}"}
+#             response_variable: result
+#             continue_on_error: true
+#           - if: [{condition: template, value_template: "{{ result is not defined or result.returncode != 0 }}"}]
+#             then: [{action: persistent_notification.create, data: {title: Pokémon-Ausmalbild nicht gedruckt, ...}}]

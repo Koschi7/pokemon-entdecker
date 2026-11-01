@@ -64,3 +64,23 @@ und setzt sich um 09:00 Uhr deutscher Zeit zurück. `pnpm tts` macht dort weiter
 
 Die alte App liegt archiviert unter `/var/backups/decommissioned/pokemon-farbsortierer-2026-10-10.tar.gz`,
 die alte nginx-Konfiguration unter `/var/backups/nginx-pokemon-2026-10-10.conf`.
+
+## Drucken vom Kinder-Tablet
+
+Der Kinder-Browser kann nicht drucken (`window.print()` tut in der Android-WebView nichts). Deshalb:
+
+1. **Druckaufträge erzeugen und hochladen** (nach neuen Ausmalbildern):
+   ```bash
+   pnpm lineart && pnpm printsheets
+   rsync -az generated/print root@49.12.43.239:/var/www/pokemon-entdecker/
+   ssh root@49.12.43.239 'chown -R www-data:www-data /var/www/pokemon-entdecker/print'
+   ```
+2. **nginx** (einmalig): `infra/nginx-pokemon.conf` bindet `/etc/nginx/snippets/pokemon-print*.conf` ein.
+   Die echte Datei nach `infra/nginx-pokemon-print.conf.example` anlegen (Druck-Code, HA-Hostname,
+   Webhook-ID eintragen, `chmod 600`), dazu `/etc/nginx/conf.d/pokemon-print-zone.conf` mit
+   `limit_req_zone $binary_remote_addr zone=pokemon_print:1m rate=6r/m;`. Dann `nginx -t && systemctl reload nginx`.
+3. **Home Assistant** (einmalig): `shell_command`, Zähler und Automation nach `infra/ha-pokemon-print.yaml`.
+4. **Tablets**: In den Eltern-Einstellungen den Druck-Code eintragen.
+
+Schutz: Ohne gültigen Code antwortet nginx mit 403. HA druckt höchstens 10 Blätter am Tag zwischen 7 und
+19 Uhr, die App sperrt den Knopf nach einem Druck 20 Sekunden lang.

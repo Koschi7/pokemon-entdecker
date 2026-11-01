@@ -100,6 +100,25 @@ export function SettingsSheet({ data, settings, onSettings, onClose, t }: Props)
           </button>
         </Row>
 
+        <Row>
+          <div className="min-w-0 flex-1">
+            <div className="text-lg font-extrabold">{ui.fullscreen}</div>
+            <div className="text-sm text-white/65">{ui.fullscreenHint}</div>
+          </div>
+          <button onClick={() => patch({ fullscreen: !settings.fullscreen })} className={pill(settings.fullscreen)}>
+            {settings.fullscreen ? ui.on : ui.off}
+          </button>
+        </Row>
+
+        <Row>
+          <div className="min-w-0 flex-1">
+            <div className="text-lg font-extrabold">{ui.printCode}</div>
+            <div className="text-sm text-white/65">{ui.printCodeHint}</div>
+          </div>
+          <input className={input} value={settings.printCode} placeholder={ui.printCode} autoComplete="off" autoCapitalize="off"
+            autoCorrect="off" spellCheck={false} onChange={(e) => patch({ printCode: e.target.value.trim().toLowerCase() })} />
+        </Row>
+
         <div className="rounded-2xl bg-white/8 p-4">
           <div className="flex items-center justify-between gap-3">
             <div>

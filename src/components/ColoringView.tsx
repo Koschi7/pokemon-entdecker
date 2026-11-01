@@ -4,7 +4,7 @@
 // Der Bildschirm bleibt an, solange die Ansicht offen ist.
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { asset } from '../data/assets';
 import { crayonFragment, crayonIndex, crayonShares, oklch, withoutOutlines, type CrayonKey, type CrayonShare } from '../data/crayons';
 import type { strings } from '../data/labels';
@@ -16,11 +16,14 @@ import { Close, ColoringPage, Printer, Shrink, Speaker } from './icons';
 const SAMPLE = 320; // Analyse-Auflösung: genau genug auch für kleine Flächen, schnell auf dem Fire-Tablet
 const MAX_ZOOM = 5;
 const DOUBLE_TAP_MS = 320;
+const PRINT_LOCK_MS = 20_000; // Kinder tippen gern zehnmal – ein Blatt pro Tipp-Serie reicht
+const IS_WEBVIEW = /; wv\)/.test(navigator.userAgent); // Kinder-Browser: kein window.print()
 
 type Props = {
   assetId: string | number;
   shiny: boolean;
   name: string;
+  printCode: string;
   onClose: () => void;
   t: ReturnType<typeof strings>;
 };
@@ -236,11 +239,13 @@ function PrintSheet({ src, name }: { src: string; name: string }) {
   );
 }
 
-export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
+export function ColoringView({ assetId, shiny, name, printCode, onClose, t }: Props) {
   const { ui, crayonName } = t;
   const src = asset.art(assetId, shiny);
   const lineSrc = asset.line(assetId); // Linien gibt es nur vom normalen Artwork – beim Ausmalen egal
   const [lineMode, setLineMode] = useState(false);
+  const [printing, setPrinting] = useState(false);
+  const [toast, setToast] = useState<{ text: string; n: number } | null>(null);
   const crayons = useCrayons(src);
   const { stage: stageRef, content: contentRef, zoomed, reset } = usePinchZoom();
   useWakeLock();
@@ -252,6 +257,39 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
   }, [onClose]);
 
   const say = (key: CrayonKey) => play(asset.fragment(crayonFragment(key)));
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 3500);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+  const show = (text: string) => setToast((t) => ({ text, n: (t?.n ?? 0) + 1 }));
+
+  /** Mit Druck-Code: über den Server an den Drucker (siehe infra/DEPLOY.md). Ohne: Druckdialog des Geräts. */
+  const print = async () => {
+    sfx.tap();
+    if (!printCode) {
+      if (IS_WEBVIEW) show(ui.printNoCode);
+      else window.print();
+      return;
+    }
+    const hour = new Date().getHours();
+    if (hour < 7 || hour >= 19) return show(ui.printSleeping);
+    setPrinting(true);
+    window.setTimeout(() => setPrinting(false), PRINT_LOCK_MS);
+    try {
+      const res = await fetch('/api/print', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Print-Key': printCode },
+        body: JSON.stringify({ key: String(assetId) }),
+      });
+      show(res.ok ? ui.printSent : res.status === 403 ? ui.printWrongCode : res.status === 429 ? ui.printTooFast : ui.printFailed);
+      if (!res.ok) setPrinting(false);
+    } catch {
+      show(ui.printFailed);
+      setPrinting(false);
+    }
+  };
 
   return createPortal(
     <motion.div
@@ -294,13 +332,29 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
             {lineMode ? ui.colorArt : ui.lineArt}
           </button>
           <button
-            onClick={() => { sfx.tap(); window.print(); }}
-            className="chunky pointer-events-auto flex h-14 items-center gap-2 rounded-full bg-ink px-4 text-[16px] font-extrabold text-white short:h-11 short:px-3 short:text-[14px]"
+            onClick={() => void print()}
+            disabled={printing}
+            className="chunky pointer-events-auto flex h-14 items-center gap-2 rounded-full bg-ink px-4 text-[16px] font-extrabold text-white disabled:opacity-60 short:h-11 short:px-3 short:text-[14px]"
           >
             <Printer className="size-7 short:size-6" />
-            {ui.print}
+            {printing ? ui.printing : ui.print}
           </button>
         </div>
+
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              key={toast.n}
+              role="status"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="pointer-events-none absolute inset-x-0 bottom-4 mx-auto w-fit max-w-[90%] rounded-full bg-ink px-5 py-2.5 text-center text-[17px] font-extrabold text-white shadow-lg short:bottom-2 short:text-[15px]"
+            >
+              {toast.text}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {zoomed && (
           <button

@@ -1,0 +1,18 @@
+# Druck-Weiterleitung an Home Assistant – Vorlage. Die echte Datei enthält den Druck-Code und die
+# geheime Webhook-Adresse und liegt NUR auf dem Server: /etc/nginx/snippets/pokemon-print.conf (chmod 600).
+# Dazu im http-Kontext: /etc/nginx/conf.d/pokemon-print-zone.conf mit
+#   limit_req_zone $binary_remote_addr zone=pokemon_print:1m rate=6r/m;
+location = /api/print {
+    limit_except POST { deny all; }
+    limit_req zone=pokemon_print burst=3 nodelay;
+    limit_req_status 429;
+    client_max_body_size 1k;
+    if ($http_x_print_key != "DRUCK-CODE") { return 403; }
+
+    proxy_pass https://HA-HOSTNAME/api/webhook/WEBHOOK-ID;
+    proxy_ssl_server_name on;
+    proxy_set_header Host HA-HOSTNAME;
+    proxy_set_header X-Print-Key "";
+    proxy_set_header Content-Type application/json;
+    add_header Cache-Control "no-store" always;
+}

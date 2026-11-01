@@ -12,6 +12,11 @@
 - Aus jedem Pokémon (auch Formen und Megas) wird ein Ausmalbild: kräftiger Umriss, Linien an den Farbgrenzen, dunkle Flächen nur umrandet
 - Im Ausmal-Helfer umschalten zwischen „Farbig“ und „Ausmalbild“, „Drucken“ gibt ein A4-Blatt mit dem Namen in Umrissbuchstaben aus
 - Hoch- oder Querformat wählt die App pro Pokémon – je nachdem, wo es größer aufs Blatt passt
+- Drucken direkt vom Kinder-Tablet: mit Druck-Code in den Eltern-Einstellungen geht das Blatt über den Server und Home Assistant an den Netzwerkdrucker (höchstens 10 Blätter am Tag, 7–19 Uhr)
+
+**Vollbild**
+- Springt nicht mehr hin und her: Hat der Browser das Vollbild verlassen, holt die App es erst nach einer halben Minute zurück, beim Tippen in der Suche nie
+- Neuer Schalter „Vollbild“ in den Eltern-Einstellungen
 
 **Suche**
 - Neuer Knopf „Suchen“ oben rechts: sucht in allen Generationen, auch Regionalformen und Megas, Vorschläge ab dem ersten Buchstaben als Bilder zum Antippen
@@ -172,6 +177,11 @@
 - Every Pokémon (including forms and Megas) becomes a coloring page: bold outline, lines at color boundaries, dark areas outlined instead of filled
 - The coloring helper switches between "Farbig" and "Ausmalbild"; "Drucken" prints an A4 page with the name in outline letters
 - Portrait or landscape per Pokémon, whichever prints it larger
+- Print straight from the kids tablet: with a print code in the parent settings the page goes through the server and Home Assistant to the network printer (at most 10 pages a day, 7 am–7 pm)
+
+**Fullscreen**
+- No more jumping: after the browser leaves fullscreen, the app waits half a minute before requesting it again, and never while typing in the search
+- New "Fullscreen" switch in the parent settings
 
 **Search**
 - New "Suchen" button at the top right: searches all generations including regional forms and Megas, with picture suggestions from the first letter

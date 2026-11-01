@@ -25,6 +25,7 @@ type Props = {
   onToggleTeam: () => boolean; // false = Team voll
   people: StagePerson[];
   family: Family;
+  printCode: string;
   t: ReturnType<typeof strings>;
 };
 
@@ -104,7 +105,7 @@ function MegaRings() {
   );
 }
 
-export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, inTeam, onToggleTeam, people, family, t }: Props) {
+export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, inTeam, onToggleTeam, people, family, printCode, t }: Props) {
   const { ui, typeName } = t;
   const pokemon = byId.get(selection.id)!;
   const megas = pokemon.megas ?? [];
@@ -416,7 +417,7 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
         {/* Ausmal-Helfer (eigene Ebene über allem, siehe ColoringView) */}
         <AnimatePresence>
           {coloring && (
-            <ColoringView assetId={assetId} shiny={shiny} name={shown.name} onClose={() => setColoring(false)} t={t} />
+            <ColoringView assetId={assetId} shiny={shiny} name={shown.name} printCode={printCode} onClose={() => setColoring(false)} t={t} />
           )}
         </AnimatePresence>
       </motion.div>

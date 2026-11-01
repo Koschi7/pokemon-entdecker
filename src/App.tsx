@@ -54,6 +54,10 @@ export function App() {
   useEffect(() => save('team', team), [team]);
   useEffect(() => save('settings', settings), [settings]);
   useEffect(() => setEffectsEnabled(settings.effects), [settings.effects]);
+  useEffect(() => {
+    // Vollbild abgeschaltet: sofort raus (das Anfordern beim Antippen steht in main.tsx)
+    if (!settings.fullscreen && document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+  }, [settings.fullscreen]);
   useEffect(() => save('selection', { id: selection?.id ?? null, form: selection?.form ?? null }), [selection]);
 
   const byId = useMemo(() => new Map<number, PokemonData>(data?.pokemon.map((p) => [p.id, p]) ?? []), [data]);
@@ -133,6 +137,7 @@ export function App() {
             onToggleTeam={() => toggleTeam(selection.id)}
             people={people}
             family={family}
+            printCode={settings.printCode}
             t={t}
           />
         )}

@@ -9,6 +9,8 @@ export type Settings = {
   mama: number;
   papa: number;
   effects: boolean;
+  fullscreen: boolean; // beim Antippen Vollbild anfordern (Kinder-Browser)
+  printCode: string; // Druck-Code: "Drucken" schickt das Ausmalbild über den Server an den Drucker
 };
 
 export const defaultSettings: Settings = {
@@ -18,6 +20,8 @@ export const defaultSettings: Settings = {
   mama: 1.68,
   papa: 1.8,
   effects: true,
+  fullscreen: true,
+  printCode: '',
 };
 
 export const TEAM_SIZE = 6;
