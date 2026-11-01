@@ -11,6 +11,7 @@
 **Ausmal-Helfer**
 - Neuer Knopf „Malen“ auf der Karte: das Pokémon groß auf hellem „Papier“, daneben die Buntstifte, die man dafür braucht
 - Die Stifte (aus einem 15er-Set) liest die App selbst aus dem Bild – nach Farbton und Sättigung, damit Schatten keine eigene Farbe werden; Umrisslinien zählen nicht
+- Auch kleine, aber feste Flächen bekommen ihren Stift: Glumandas gelbe Flamme, Pikachus rote Backen und schwarze Ohrspitzen, Bisasams rote Augen
 - Tippt das Kind auf einen Stift, sagt Puck die Farbe und alles andere im Bild verblasst: So sieht man, wo die Farbe hinkommt
 - Mit zwei Fingern oder Doppeltipp zoomen, der Bildschirm bleibt an, solange die Ansicht offen ist
 - Klappt auch mit Shiny, Regionalformen und Megas
@@ -160,6 +161,7 @@
 **Coloring helper**
 - New "Malen" button on the card: the Pokémon large on light "paper", next to the crayons you need for it
 - The app reads the crayons (from a 15-color set) from the artwork itself, by hue and saturation so shading does not become a color of its own; outlines are ignored
+- Small but solid areas get their crayon too: Charmander's yellow flame, Pikachu's red cheeks and black ear tips, Bulbasaur's red eyes
 - Tapping a crayon makes Puck say the color and fades everything else, so the child sees where the color goes
 - Pinch or double-tap to zoom; the screen stays on while the view is open
 - Works with shiny, regional forms and Megas

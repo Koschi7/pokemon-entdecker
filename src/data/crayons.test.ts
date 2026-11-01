@@ -24,18 +24,31 @@ describe('crayonOf', () => {
 
 describe('crayonShares', () => {
   it('zählt nur sichtbare Pixel und sortiert nach Anteil', () => {
-    const shares = crayonsFor(pixels([CRAYONS.yellow, 6], [CRAYONS.black, 3], [CRAYONS.red, 1], [null, 90]));
+    const shares = crayonsFor(pixels([CRAYONS.yellow, 6], [CRAYONS.black, 3], [CRAYONS.red, 1], [null, 90]), 10);
     expect(shares.map((s) => s.key)).toEqual(['yellow', 'black', 'red']);
     expect(shares[0]!.share).toBeCloseTo(0.6);
   });
   it('lässt kleine Anteile weg', () => {
-    const shares = crayonsFor(pixels([CRAYONS.yellow, 97], [CRAYONS.red, 3]));
+    const shares = crayonsFor(pixels([CRAYONS.yellow, 97], [CRAYONS.red, 3]), 10);
     expect(shares.map((s) => s.key)).toEqual(['yellow']);
+  });
+  it('nimmt kleine feste Flächen dazu (Flamme, Backen), aber keine dünnen Ränder', () => {
+    // 40×40 Gelb mit einem roten 7×7-Fleck (3 %), einer rosa Linie (3 %) und einem weißen Glanzlicht
+    const w = 40;
+    const index = new Uint8Array(w * w).fill(CRAYON_KEYS.indexOf('yellow'));
+    const paint = (key: (typeof CRAYON_KEYS)[number], x0: number, y0: number, sx: number, sy: number) => {
+      for (let y = y0; y < y0 + sy; y++) for (let x = x0; x < x0 + sx; x++) index[y * w + x] = CRAYON_KEYS.indexOf(key);
+    };
+    paint('red', 5, 5, 7, 7);
+    paint('pink', 20, 0, 1, 40);
+    paint('pink', 22, 0, 1, 9);
+    paint('white', 28, 28, 7, 7);
+    expect(crayonShares(index, w).map((s) => s.key)).toEqual(['yellow', 'red']);
   });
   it('liefert für ein leeres Bild nichts', () => {
     const index = crayonIndex(pixels([null, 10]));
     expect([...index].every((i) => i === NO_CRAYON)).toBe(true);
-    expect(crayonShares(index)).toEqual([]);
+    expect(crayonShares(index, 10)).toEqual([]);
   });
 });
 

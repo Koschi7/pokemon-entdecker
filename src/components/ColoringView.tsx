@@ -37,7 +37,7 @@ function useCrayons(src: string) {
       const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
       ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
       const index = withoutOutlines(crayonIndex(ctx.getImageData(0, 0, SAMPLE, SAMPLE).data), SAMPLE);
-      if (alive) setResult({ index, shares: crayonShares(index) });
+      if (alive) setResult({ index, shares: crayonShares(index, SAMPLE) });
     }).catch(() => {});
     return () => { alive = false; };
   }, [src]);

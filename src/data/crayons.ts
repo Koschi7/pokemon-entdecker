@@ -63,6 +63,7 @@ export function crayonOf(r: number, g: number, b: number): CrayonKey {
   }
   if (h < 112) {
     if (L < 0.45) return 'brown';
+    if (h < 88 && L < 0.78 && sat >= 0.13) return 'orange'; // kräftiges Gelborange (Raichu), nicht Gelb (Enton)
     return sat >= 0.09 ? 'yellow' : 'beige';
   }
   if (h < 158) return L >= 0.7 ? 'lightGreen' : 'darkGreen';
@@ -126,22 +127,43 @@ export function withoutOutlines(index: Uint8Array, width: number): Uint8Array {
 
 export type CrayonShare = { key: CrayonKey; hex: string; share: number };
 
-/** Die Stifte mit nennenswertem Anteil, größter zuerst. Kleinere fallen weg (Glanzlichter, Kanten). */
-export function crayonShares(index: Uint8Array, minShare = 0.05, max = 6): CrayonShare[] {
+const MAIN_SHARE = 0.05; // ab 5 % der Fläche ist ein Stift immer dabei
+const CORE = 2; // Kern = Pixel, deren 5×5-Umgebung ganz dieselbe Farbe hat
+const DETAIL_CORE = 0.004; // kleine, aber feste Fläche: Flamme, Backen, Augen
+const BLACK_DETAIL_CORE = 0.015; // Pupillen hat jedes Pokémon – Schwarz nur bei größeren Flächen (Ohrspitzen)
+const NEVER_DETAIL = new Set<CrayonKey>(['white', 'gray', 'beige']); // kleine Flächen davon sind Glanzlichter
+
+/**
+ * Die Stifte, die man braucht: große Flächen (nach Anteil) und danach kleine, aber feste Details
+ * (nach Größe ihres Kerns). Schattenränder und Glanzlichter sind dünn und haben keinen Kern.
+ */
+export function crayonShares(index: Uint8Array, width: number, max = 6): CrayonShare[] {
+  const height = index.length / width;
   const counts = new Array<number>(CRAYON_KEYS.length).fill(0);
+  const cores = new Array<number>(CRAYON_KEYS.length).fill(0);
   let total = 0;
-  for (const idx of index) {
-    if (idx === NO_CRAYON) continue;
-    counts[idx]! += 1;
-    total += 1;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const k = index[y * width + x]!;
+      if (k === NO_CRAYON) continue;
+      counts[k]! += 1;
+      total += 1;
+      let core = x >= CORE && y >= CORE && x < width - CORE && y < height - CORE;
+      for (let dy = -CORE; core && dy <= CORE; dy++) {
+        for (let dx = -CORE; core && dx <= CORE; dx++) core = index[(y + dy) * width + x + dx] === k;
+      }
+      if (core) cores[k]! += 1;
+    }
   }
   if (!total) return [];
-  return CRAYON_KEYS
-    .map((key, i) => ({ key, hex: CRAYONS[key], share: counts[i]! / total }))
-    .filter((c) => c.share >= minShare)
-    .sort((a, b) => b.share - a.share)
-    .slice(0, max);
+  const all = CRAYON_KEYS.map((key, i) => ({ key, hex: CRAYONS[key], share: counts[i]! / total, core: cores[i]! / total }));
+  const main = all.filter((c) => c.share >= MAIN_SHARE).sort((a, b) => b.share - a.share);
+  const details = all
+    .filter((c) => c.share < MAIN_SHARE && !NEVER_DETAIL.has(c.key))
+    .filter((c) => c.core >= (c.key === 'black' ? BLACK_DETAIL_CORE : DETAIL_CORE))
+    .sort((a, b) => b.core - a.core);
+  return [...main, ...details].slice(0, max).map(({ key, hex, share }) => ({ key, hex, share }));
 }
 
-export const crayonsFor = (rgba: ArrayLike<number>, minShare?: number, max?: number) =>
-  crayonShares(crayonIndex(rgba), minShare, max);
+export const crayonsFor = (rgba: ArrayLike<number>, width: number, max?: number) =>
+  crayonShares(crayonIndex(rgba), width, max);
