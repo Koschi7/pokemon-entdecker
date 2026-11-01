@@ -121,6 +121,8 @@ function usePinchZoom() {
     };
 
     const down = (e: PointerEvent) => {
+      // Knöpfe auf der Bühne (Schließen, Name, Zoom zurück) nicht abfangen – sonst kommt ihr Klick nie an
+      if (e.target instanceof Element && e.target.closest('button')) return;
       try {
         el.setPointerCapture(e.pointerId); // Finger darf die Bühne beim Ziehen verlassen
       } catch {
