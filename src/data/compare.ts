@@ -42,6 +42,22 @@ export const FRAGMENTS = {
   victory: 'Wahnsinn! Hundert Stück! Du bist ein echter Pokémon-Meister!',
   // Mega-Entwicklung
   megaEvolve: 'Mega-Entwicklung!',
+  // Ausmal-Helfer: die Stifte (siehe crayons.ts)
+  crayonYellow: 'Gelb!',
+  crayonOrange: 'Orange!',
+  crayonRed: 'Rot!',
+  crayonPink: 'Rosa!',
+  crayonPurple: 'Lila!',
+  crayonDarkBlue: 'Dunkelblau!',
+  crayonLightBlue: 'Hellblau!',
+  crayonTurquoise: 'Türkis!',
+  crayonDarkGreen: 'Dunkelgrün!',
+  crayonLightGreen: 'Hellgrün!',
+  crayonBrown: 'Braun!',
+  crayonBeige: 'Beige!',
+  crayonGray: 'Grau!',
+  crayonBlack: 'Schwarz!',
+  crayonWhite: 'Weiß!',
 } as const;
 
 export type FragmentKey = keyof typeof FRAGMENTS;

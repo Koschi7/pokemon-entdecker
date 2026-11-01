@@ -8,7 +8,8 @@ import { compareFragments, type Family } from '../data/compare';
 import { play, playSequence } from '../lib/audio';
 import { sfx } from '../lib/sfx';
 import type { StagePerson } from '../family';
-import { Close, Evolve, Flip, Globe, MegaStone, Pokeball, Ruler, Sparkles, Speaker } from './icons';
+import { ColoringView } from './ColoringView';
+import { Close, Crayon, Evolve, Flip, Globe, MegaStone, Pokeball, Ruler, Sparkles, Speaker } from './icons';
 import { SizeStage, type StageFigure } from './SizeStage';
 
 export type Selection = { id: number; form: string | null; nonce: number };
@@ -126,6 +127,7 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
   const [evolving, setEvolving] = useState<'glow' | 'mega' | 'reveal' | null>(null);
   const [picker, setPicker] = useState<'evolve' | 'mega' | null>(null);
   const [teamShake, setTeamShake] = useState(0);
+  const [coloring, setColoring] = useState(false);
 
   // Keine Sprache beim Öffnen – gesprochen wird erst, wenn das Kind auf Name oder Bild tippt
   useEffect(() => {
@@ -371,6 +373,7 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
                 {next.length > 0 && (
                   <ActionButton icon={<Evolve className="size-full" />} label={ui.evolve} active={picker === 'evolve'} tone="bg-[#5b3fd6]" onClick={onEvolve} />
                 )}
+                <ActionButton icon={<Crayon className="size-full" />} label={ui.paint} tone="bg-[#c2410c]" onClick={() => { setColoring(true); sfx.tap(); }} />
                 <ActionButton icon={<Ruler className="size-full" />} label={ui.size} tone="bg-[#1f8a70]" onClick={() => { setFlipped(true); sfx.flip(); }} />
               </div>
             </section>
@@ -409,6 +412,13 @@ export function DetailCard({ data, bbox, byId, selection, onSelection, onClose, 
         >
           <Close className="size-7" />
         </button>
+
+        {/* Ausmal-Helfer (eigene Ebene über allem, siehe ColoringView) */}
+        <AnimatePresence>
+          {coloring && (
+            <ColoringView assetId={assetId} shiny={shiny} name={shown.name} onClose={() => setColoring(false)} t={t} />
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );

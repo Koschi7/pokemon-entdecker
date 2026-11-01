@@ -166,6 +166,29 @@ export function Flip({ className }: P) {
   );
 }
 
+/** Buntstift (schräg): Knopf "Malen" */
+export function Crayon({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden>
+      <g transform="rotate(-45 32 32)" stroke="#1d1d2b" strokeWidth="3" strokeLinejoin="round">
+        <rect x="4" y="22" width="34" height="20" rx="3" fill="#e3350d" />
+        <path d="M14 22v20" stroke="#9e2208" />
+        <path d="M38 22l18 10-18 10z" fill="#f4d29c" />
+        <path d="M49 28.2l7 3.8-7 3.8z" fill="#e3350d" />
+      </g>
+    </svg>
+  );
+}
+
+/** Vier Pfeile nach innen: Zoom zurücksetzen */
+export function Shrink({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 10l14 14M24 12v12H12M54 10L40 24M40 12v12h12M10 54l14-14M24 52V40H12M54 54L40 40M40 52V40h12" />
+    </svg>
+  );
+}
+
 /** Person für die Größen-Bühne (Kopf + Körper); Kinder mit größerem Kopf. */
 export function Person({ className, style, child = false, color }: P & { style?: React.CSSProperties; child?: boolean; color: string }) {
   const head = child ? 15 : 11;

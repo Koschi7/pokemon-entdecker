@@ -1,5 +1,7 @@
 // Farben, Typen und Oberflächentexte. Die Kinder lesen (noch) nicht – Texte sind für Eltern
 // und als Beschriftung unter Symbolen. Englisch für alle, die das Repo klonen.
+import type { CrayonKey } from './crayons';
+
 export type Lang = 'de' | 'en';
 
 export const TYPE_COLORS: Record<string, string> = {
@@ -45,6 +47,19 @@ const COLOR_NAMES: Record<Lang, Record<string, string>> = {
   en: Object.fromEntries(COLORS.map((c) => [c, c[0]!.toUpperCase() + c.slice(1)])),
 };
 
+const CRAYON_NAMES: Record<Lang, Record<CrayonKey, string>> = {
+  de: {
+    yellow: 'Gelb', orange: 'Orange', red: 'Rot', pink: 'Rosa', purple: 'Lila', darkBlue: 'Dunkelblau',
+    lightBlue: 'Hellblau', turquoise: 'Türkis', darkGreen: 'Dunkelgrün', lightGreen: 'Hellgrün', brown: 'Braun',
+    beige: 'Beige', gray: 'Grau', black: 'Schwarz', white: 'Weiß',
+  },
+  en: {
+    yellow: 'Yellow', orange: 'Orange', red: 'Red', pink: 'Pink', purple: 'Purple', darkBlue: 'Dark blue',
+    lightBlue: 'Light blue', turquoise: 'Turquoise', darkGreen: 'Dark green', lightGreen: 'Light green', brown: 'Brown',
+    beige: 'Beige', gray: 'Gray', black: 'Black', white: 'White',
+  },
+};
+
 const UI = {
   de: {
     color: 'Farbe', type: 'Typ', team: 'Team', sizeSort: 'Klein → groß', all: 'Alle', gen: 'Generation',
@@ -58,7 +73,7 @@ const UI = {
     holdForSettings: 'Für Eltern: 3 Sekunden gedrückt halten',
     on: 'An', off: 'Aus', failed: 'fehlgeschlagen', name: 'Name',
     quiz: 'Quiz', quizWho: 'Wer ist das?', next: 'Noch eins!',
-    mega: 'Mega',
+    mega: 'Mega', paint: 'Malen', crayons: 'Diese Stifte brauchst du', showAll: 'Ganz zeigen',
     games: 'Spiele', bigger: 'Wer ist größer?', again: 'Nochmal!', best: 'Rekord', gameOver: 'Spiel vorbei',
     newBest: 'Neuer Rekord!', master: 'Pokémon-Meister!', biggerTag: 'größer',
     familyHint: 'Nur für die Größen-Bühne. Bleibt auf diesem Tablet und wird nirgends hochgeladen. Gesprochen wird „du“ und „dein Bruder“.',
@@ -75,7 +90,7 @@ const UI = {
     holdForSettings: 'Parents: hold for 3 seconds',
     on: 'On', off: 'Off', failed: 'failed', name: 'Name',
     quiz: 'Quiz', quizWho: "Who's that?", next: 'Another one!',
-    mega: 'Mega',
+    mega: 'Mega', paint: 'Color in', crayons: 'Crayons you need', showAll: 'Show all',
     games: 'Games', bigger: "Who's bigger?", again: 'Again!', best: 'Best', gameOver: 'Game over',
     newBest: 'New record!', master: 'Pokémon Master!', biggerTag: 'bigger',
     familyHint: 'Only for the size stage. Stays on this tablet and is never uploaded. Spoken as “you” and “your brother”.',
@@ -89,5 +104,6 @@ export function strings(lang: Lang) {
     ui: UI[lang] as UiStrings,
     typeName: (t: string) => TYPE_NAMES[lang][t] ?? t,
     colorName: (c: string) => COLOR_NAMES[lang][c] ?? c,
+    crayonName: (c: CrayonKey) => CRAYON_NAMES[lang][c],
   };
 }
