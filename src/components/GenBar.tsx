@@ -2,11 +2,12 @@ import { GEN_STARTERS } from '../data/labels';
 import { asset } from '../data/assets';
 import type { UiStrings } from '../data/labels';
 import { sfx } from '../lib/sfx';
+import { Magnifier } from './icons';
 
-type Props = { gen: number; onGen: (gen: number) => void; ui: UiStrings };
+type Props = { gen: number; onGen: (gen: number) => void; onSearch: () => void; ui: UiStrings };
 
 /** Generationen als Starter-Symbole – Kinder erkennen Bisasam, nicht die Zahl 1. */
-export function GenBar({ gen, onGen: setGen, ui }: Props) {
+export function GenBar({ gen, onGen: setGen, onSearch, ui }: Props) {
   const onGen = (g: number) => {
     sfx.tap();
     setGen(g);
@@ -37,6 +38,13 @@ export function GenBar({ gen, onGen: setGen, ui }: Props) {
           </button>
         );
       })}
+      <button
+        onClick={() => { sfx.tap(); onSearch(); }}
+        className="chunky ml-auto flex h-12 shrink-0 items-center gap-2 rounded-full bg-white px-4 text-[15px] font-extrabold text-ink short:h-10 short:px-3"
+      >
+        <Magnifier className="size-6" />
+        {ui.search}
+      </button>
     </div>
   );
 }

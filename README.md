@@ -11,6 +11,7 @@ This is a non-commercial fan project. See [Legal](#legal) before you use it.
 
 - **Filter by color, type and generation.** Colors use PokéAPI's species colors, types use icons, and each generation is shown as its starter (kids recognize Bulbasaur, not the number 1).
 - **Sort small → big.** One tap sorts the grid by height.
+- **Search.** A search across all generations, regional forms and Megas suggests pictures from the first letter (`src/data/search.ts`). It ranks name starts first, then word starts (also English names and "Mega-Glurak X"), then spelling mistakes (edit distance on the name prefix) and similar-sounding names (Kölner Phonetik), so "Glurack" or "Samasenta" still work. An empty search shows the last 12 Pokémon picked on this tablet, so kids can find them again by picture.
 - **Collectible flip cards.** Every Pokémon opens as a trading card with its artwork, types, cry, name and an "Das ist …!" voice line. Flip the card to see the size stage.
 - **Size stage.** The Pokémon, its evolution line and your family stand side by side to scale. Tap a figure to hear a comparison such as "Glurak ist größer als du!" or "Genau so groß wie Papa!".
 - **Evolution trees.** Full evolution families, including branches (e.g. Eevee). An evolve button plays a glow-and-reveal animation, and for branching evolutions the child picks the target.

@@ -56,6 +56,16 @@ export function loadList(key: string): number[] {
   }
 }
 
+/** Liste beliebiger Einträge – anders als load() ohne Zusammenführen mit Standardwerten. */
+export function loadArray(key: string): unknown[] {
+  try {
+    const list = JSON.parse(raw(key) ?? '[]');
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
 export function save(key: string, value: unknown): void {
   const json = JSON.stringify(value);
   memory.set(key, json);

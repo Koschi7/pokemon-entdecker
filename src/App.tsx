@@ -18,6 +18,7 @@ import { Bigger } from './components/games/Bigger';
 import { GamePicker } from './components/games/GamePicker';
 import { Quiz } from './components/games/Quiz';
 import { Rail } from './components/Rail';
+import { SearchSheet } from './components/SearchSheet';
 import { SettingsSheet } from './components/SettingsSheet';
 
 export function App() {
@@ -32,6 +33,7 @@ export function App() {
     return last.id ? { id: last.id, form: last.form, nonce: 1 } : null;
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [teamBump, setTeamBump] = useState(0);
   const t = strings(settings.lang);
 
@@ -92,7 +94,9 @@ export function App() {
       <Rail view={view} onView={onView} onSettings={() => setSettingsOpen(true)} teamBump={teamBump} ui={t.ui} />
       {['color', 'type', 'team'].includes(view.mode) && <FilterColumn view={view} onView={onView} team={teamPokemon} onSelect={open} t={t} />}
       <main className="flex min-w-0 flex-1 flex-col">
-        {!['team', 'quiz', 'bigger'].includes(view.mode) && <GenBar gen={view.gen} onGen={(gen) => onView({ gen })} ui={t.ui} />}
+        {!['team', 'quiz', 'bigger'].includes(view.mode) && (
+          <GenBar gen={view.gen} onGen={(gen) => onView({ gen })} onSearch={() => setSearchOpen(true)} ui={t.ui} />
+        )}
         {view.mode === 'games' ? (
           <GamePicker ui={t.ui} onPick={(mode) => onView({ mode })} />
         ) : view.mode === 'quiz' ? (
@@ -129,6 +133,19 @@ export function App() {
             onToggleTeam={() => toggleTeam(selection.id)}
             people={people}
             family={family}
+            t={t}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {searchOpen && (
+          <SearchSheet
+            pokemon={data.pokemon}
+            onPick={({ id, form }) => {
+              setSearchOpen(false);
+              setSelection((s) => ({ id, form, nonce: (s?.nonce ?? 0) + 1 }));
+            }}
+            onClose={() => setSearchOpen(false)}
             t={t}
           />
         )}

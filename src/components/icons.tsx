@@ -180,6 +180,16 @@ export function Crayon({ className }: P) {
   );
 }
 
+/** Lupe: Suche */
+export function Magnifier({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round">
+      <circle cx="27" cy="27" r="17" />
+      <path d="M40 40l15 15" />
+    </svg>
+  );
+}
+
 /** Vier Pfeile nach innen: Zoom zurücksetzen */
 export function Shrink({ className }: P) {
   return (

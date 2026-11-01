@@ -8,6 +8,11 @@
 
 ### 2026-11-01
 
+**Suche**
+- Neuer Knopf „Suchen“ oben rechts: sucht in allen Generationen, auch Regionalformen und Megas, Vorschläge ab dem ersten Buchstaben als Bilder zum Antippen
+- Verzeiht Tippfehler beim Buchstabieren nach Gehör („Glurack“, „Pikatschu“, „Samasenta“) und findet auch englische Namen
+- Ohne Eingabe stehen die zuletzt gesuchten Pokémon da – die finden die Kinder am Bild wieder, ganz ohne Lesen
+
 **Ausmal-Helfer**
 - Neuer Knopf „Malen“ auf der Karte: das Pokémon groß auf hellem „Papier“, daneben die Buntstifte, die man dafür braucht
 - Die Stifte (aus einem 15er-Set) liest die App selbst aus dem Bild – nach Farbton und Sättigung, damit Schatten keine eigene Farbe werden; Umrisslinien zählen nicht
@@ -157,6 +162,11 @@
 ## English
 
 ### 2026-11-01
+
+**Search**
+- New "Suchen" button at the top right: searches all generations including regional forms and Megas, with picture suggestions from the first letter
+- Forgives spelling by ear ("Glurack", "Pikatschu", "Samasenta") and also finds English names
+- With an empty field it shows the recently searched Pokémon, so kids find them again by picture without reading
 
 **Coloring helper**
 - New "Malen" button on the card: the Pokémon large on light "paper", next to the crayons you need for it
