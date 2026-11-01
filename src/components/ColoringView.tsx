@@ -1,18 +1,17 @@
 // Ausmal-Helfer: Das Pokémon groß auf "Papier", daneben die Stifte, die man dafür braucht. Tippt das Kind
-// auf einen Stift, sagt Puck die Farbe und das Bild zeigt, wo sie hinkommt. Mit zwei Fingern (oder
-// Doppeltipp) lässt sich hineinzoomen. Der Bildschirm bleibt an, solange die Ansicht offen ist.
+// auf einen Stift, sagt Puck die Farbe. Mit zwei Fingern (oder Doppeltipp) lässt sich hineinzoomen.
+// Der Bildschirm bleibt an, solange die Ansicht offen ist.
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { asset } from '../data/assets';
-import { CRAYON_KEYS, NO_CRAYON, crayonFragment, crayonIndex, crayonShares, oklch, withoutOutlines, type CrayonKey, type CrayonShare } from '../data/crayons';
+import { crayonFragment, crayonIndex, crayonShares, oklch, withoutOutlines, type CrayonKey, type CrayonShare } from '../data/crayons';
 import type { strings } from '../data/labels';
 import { play } from '../lib/audio';
 import { sfx } from '../lib/sfx';
 import { Close, Shrink, Speaker } from './icons';
 
-const SAMPLE = 320; // Analyse-Auflösung: genau genug für Anteile und Hervorhebung, schnell auf dem Fire-Tablet
-const PAPER = [251, 247, 238] as const;
+const SAMPLE = 320; // Analyse-Auflösung: genau genug auch für kleine Flächen, schnell auf dem Fire-Tablet
 const MAX_ZOOM = 5;
 const DOUBLE_TAP_MS = 320;
 
@@ -24,9 +23,9 @@ type Props = {
   t: ReturnType<typeof strings>;
 };
 
-/** Artwork laden und jedem Pixel einen Stift zuordnen. */
+/** Artwork laden und die passenden Stifte bestimmen. */
 function useCrayons(src: string) {
-  const [result, setResult] = useState<{ index: Uint8Array; shares: CrayonShare[] } | null>(null);
+  const [result, setResult] = useState<CrayonShare[]>([]);
   useEffect(() => {
     let alive = true;
     const img = new Image();
@@ -37,7 +36,7 @@ function useCrayons(src: string) {
       const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
       ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
       const index = withoutOutlines(crayonIndex(ctx.getImageData(0, 0, SAMPLE, SAMPLE).data), SAMPLE);
-      if (alive) setResult({ index, shares: crayonShares(index, SAMPLE) });
+      if (alive) setResult(crayonShares(index, SAMPLE));
     }).catch(() => {});
     return () => { alive = false; };
   }, [src]);
@@ -197,22 +196,17 @@ function usePinchZoom() {
 }
 
 /** Ein Buntstift zum Antippen, die Farbe steht wie bei echten Stiften auf dem Schaft. */
-function CrayonButton({ crayon, label, active, onClick }: {
-  crayon: CrayonShare; label: string; active: boolean; onClick: () => void;
-}) {
+function CrayonButton({ crayon, label, onClick }: { crayon: CrayonShare; label: string; onClick: () => void }) {
   const light = oklch(...([1, 3, 5].map((i) => parseInt(crayon.hex.slice(i, i + 2), 16)) as [number, number, number]))[0] > 0.72;
   const edge = `color-mix(in oklab, ${crayon.hex} 62%, black)`;
   return (
     <motion.button
       onClick={onClick}
-      aria-pressed={active}
-      whileTap={{ scale: 0.95 }}
-      animate={{ x: active ? -14 : 0 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+      whileTap={{ scale: 0.92 }}
       className="flex min-h-9 w-full items-stretch drop-shadow-[0_3px_0_rgb(0_0_0/0.18)] landscape:max-h-14 landscape:min-h-0 landscape:flex-1 portrait:h-12 portrait:w-[calc(50%-4px)]"
     >
       <span
-        className={`flex min-w-0 flex-1 items-center justify-center rounded-l-[10px] border-y-[3px] border-l-[3px] px-2 text-[16px] leading-none font-black short:text-[14px] ${active ? 'ring-4 ring-sun' : ''}`}
+        className="flex min-w-0 flex-1 items-center justify-center rounded-l-[10px] border-y-[3px] border-l-[3px] px-2 text-[16px] leading-none font-black short:text-[14px]"
         style={{ background: crayon.hex, borderColor: edge, color: light ? '#10132a' : '#fff' }}
       >
         {label}
@@ -229,8 +223,6 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
   const { ui, crayonName } = t;
   const src = asset.art(assetId, shiny);
   const crayons = useCrayons(src);
-  const [selected, setSelected] = useState<CrayonKey | null>(null);
-  const overlayRef = useRef<HTMLCanvasElement>(null);
   const { stage: stageRef, content: contentRef, zoomed, reset } = usePinchZoom();
   useWakeLock();
 
@@ -240,25 +232,7 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Hervorhebung: alles, was nicht zum gewählten Stift gehört, verblasst wie unter Pauspapier
-  useEffect(() => {
-    const ctx = overlayRef.current?.getContext('2d');
-    if (!ctx) return;
-    ctx.clearRect(0, 0, SAMPLE, SAMPLE);
-    if (!crayons || !selected) return;
-    const keep = CRAYON_KEYS.indexOf(selected);
-    const img = ctx.createImageData(SAMPLE, SAMPLE);
-    crayons.index.forEach((idx, p) => {
-      if (idx === NO_CRAYON || idx === keep) return;
-      img.data.set([...PAPER, 238], p * 4);
-    });
-    ctx.putImageData(img, 0, 0);
-  }, [crayons, selected]);
-
-  const pick = (key: CrayonKey) => {
-    setSelected((s) => (s === key ? null : key));
-    play(asset.fragment(crayonFragment(key)));
-  };
+  const say = (key: CrayonKey) => play(asset.fragment(crayonFragment(key)));
 
   return createPortal(
     <motion.div
@@ -273,7 +247,6 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
         <div className="absolute inset-0 grid place-items-center p-4 [container-type:size] short:p-2">
           <div ref={contentRef} className="relative size-[min(100cqw,100cqh)] will-change-transform">
             <img src={src} alt={name} draggable={false} className="absolute inset-0 size-full object-contain" />
-            <canvas ref={overlayRef} width={SAMPLE} height={SAMPLE} className="absolute inset-0 size-full" />
           </div>
         </div>
 
@@ -307,8 +280,8 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
 
       <aside className="flex shrink-0 flex-col gap-2 bg-[#efe7d6] p-3 landscape:w-[clamp(170px,24vw,250px)] portrait:flex-row portrait:flex-wrap portrait:justify-center short:gap-1.5 short:p-2">
         <h2 className="text-center text-[13px] leading-tight font-extrabold text-ink/55 portrait:w-full">{ui.crayons}</h2>
-        {crayons?.shares.map((c) => (
-          <CrayonButton key={c.key} crayon={c} label={crayonName(c.key)} active={selected === c.key} onClick={() => pick(c.key)} />
+        {crayons.map((c) => (
+          <CrayonButton key={c.key} crayon={c} label={crayonName(c.key)} onClick={() => say(c.key)} />
         ))}
       </aside>
     </motion.div>,
