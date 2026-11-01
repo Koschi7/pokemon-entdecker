@@ -18,7 +18,7 @@ This is a non-commercial fan project. See [Legal](#legal) before you use it.
 - **Shiny.** A toggle shows the shiny artwork, and every card has a small chance of opening as a shiny surprise.
 - **Regional forms.** Alolan, Galarian, Hisuian and Paldean forms. Evolving keeps the region (Alolan Vulpix → Alolan Ninetales).
 - **Mega Evolution.** 99 Mega and Primal forms, including the new ones from Legends Z-A. A Mega button with a rainbow animation; for Pokémon with several Megas (Charizard X/Y) the child picks one. Tiles show a Mega stone badge.
-- **Coloring helper.** Kids color a lot of Pokémon on paper. The "Malen" button shows the artwork large on a light background, next to the crayons from a 15-color set that you need for it. The crayons are read from the artwork in the browser (`src/data/crayons.ts`): each pixel is matched by hue and saturation in OKLCh so shading stays the same crayon, and thin outlines are ignored. Large areas always count; small areas count only if they are solid (a 5×5 core), so Charmander's flame and Pikachu's cheeks make the list while shading rims and highlights do not. Tapping a crayon says its name. Pinch or double-tap to zoom; a screen wake lock keeps the tablet on.
+- **Coloring helper.** Kids color a lot of Pokémon on paper. The "Malen" button shows the artwork large on a light background, next to the crayons from a 15-color set that you need for it. The crayons are read from the artwork in the browser (`src/data/crayons.ts`): each pixel is matched by hue and saturation in OKLCh so shading stays the same crayon, and thin outlines are ignored. Large areas always count; small areas count only if they are solid (a 5×5 core), so Charmander's flame and Pikachu's cheeks make the list while shading rims and highlights do not. Tapping a crayon says its name. Pinch or double-tap to zoom; a screen wake lock keeps the tablet on. A toggle switches to a **coloring page** of the same Pokémon, and "Drucken" prints it on A4 with the name in outline letters to color in. Portrait or landscape is chosen per Pokémon, whichever prints it larger (`src/data/print.ts`). The coloring pages come from `pipeline/lineart.py`: a bold outline from the alpha channel, lines at color boundaries after flattening the shading (mean shift + Canny), and the artwork's own dark lines; large dark areas are outlined instead of filled.
 - **My Team.** Catch up to 6 Pokémon with the Poké Ball button.
 - **Games.** Two games, each with 3 lives (Poké Balls), a score up to 100, a record saved on the tablet, and a celebration with trophy and confetti at 100:
   - **"Wer ist das Pokémon?"**: a silhouette and three pictures to choose from. Distractors always have a different color, so even four-year-olds have a fair chance. A wrong tap costs a Poké Ball, but the child may keep looking.
@@ -36,6 +36,7 @@ PokéAPI ─────────────► pnpm data   ─► generated
 artwork + cries ─────► pnpm assets ─► generated/img/{art,shiny,thumb}/    (WebP, 512 px / 160 px)
                                       generated/audio/cry/                (AAC, loudness-matched)
                                       generated/data/bbox.json            (visible outline per artwork)
+artwork (PNG cache) ─► pnpm lineart ► generated/img/line/                 (coloring pages, 1-bit PNG)
 Gemini TTS ──────────► pnpm tts    ─► generated/audio/de/{satz,name,frag}/
                                                 │
 src/ ─► pnpm build ─► dist/ (app shell + service worker)
@@ -60,6 +61,7 @@ Requirements:
 - Node.js 20.19+ or 22.13+
 - pnpm, via Corepack: `corepack enable`
 - ffmpeg and ffprobe on your `PATH`, for `pnpm assets` and `pnpm tts`
+- Python 3.12 with a local venv, only for the coloring pages (`pnpm lineart`)
 - A Google AI Studio API key, only for the voice clips
 
 ```bash
@@ -72,6 +74,8 @@ pnpm data
 pnpm assets
 echo "GEMINI_API_KEY=your-key" > .env   # never commit this file
 pnpm tts
+python3.12 -m venv .venv && .venv/bin/pip install -r pipeline/requirements-lineart.txt
+pnpm lineart                             # coloring pages from the cached artwork
 
 pnpm dev                                 # http://localhost:5173
 ```
@@ -94,6 +98,7 @@ To check pronunciation, run `pnpm review` and open `generated/review/index.html`
 | `pnpm assets` | Download artwork and cries, convert to WebP/AAC, compute outlines |
 | `pnpm tts` | Generate German voice clips with Gemini (resumable; `--batch`, `--max-requests`, `--dry-run`) |
 | `pnpm review` | Build `generated/review/index.html` for checking pronunciation |
+| `pnpm lineart` | Turn every artwork into a coloring page (OpenCV; only missing ones, `--force` for all) |
 
 ## Deployment
 

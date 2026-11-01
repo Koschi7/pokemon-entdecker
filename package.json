@@ -14,7 +14,8 @@
     "data": "tsx pipeline/build-data.ts",
     "assets": "tsx pipeline/assets.ts",
     "tts": "tsx pipeline/tts.ts",
-    "review": "tsx pipeline/review.ts"
+    "review": "tsx pipeline/review.ts",
+    "lineart": ".venv/bin/python pipeline/lineart.py"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

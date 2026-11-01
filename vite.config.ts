@@ -68,6 +68,12 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: { cacheName: 'art', cacheableResponse: { statuses: [0, 200] } },
           },
+          {
+            // Ausmalbilder: nur bei Bedarf, und neu erzeugte Linien sollen ankommen
+            urlPattern: /\/img\/line\//,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'line', expiration: { maxEntries: 200 }, cacheableResponse: { statuses: [0, 200] } },
+          },
         ],
       },
     }),

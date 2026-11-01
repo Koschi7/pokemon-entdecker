@@ -6,6 +6,7 @@ export const asset = {
   bbox: '/data/bbox.json', // sichtbarer Umriss je Artwork [x, y, w, h] als Anteil
   thumb: (id: Id) => `/img/thumb/${id}.webp`,
   art: (id: Id, shiny = false) => `/img/${shiny ? 'shiny' : 'art'}/${id}.webp`,
+  line: (id: Id) => `/img/line/${id}.png`, // Ausmalbild: schwarze Linien, auf den Inhalt zugeschnitten
   cry: (id: Id) => `/audio/cry/${id}.m4a`,
   sentence: (id: Id) => `/audio/de/satz/${id}.m4a`,
   name: (id: Id) => `/audio/de/name/${id}.m4a`,

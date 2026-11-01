@@ -97,6 +97,34 @@ button { cursor: pointer; }
   .foil::after { animation: none !important; }
 }
 
+/* Ausmalbild drucken: nur das Blatt, A4 (Ausrichtung setzt die Seite selbst, siehe ColoringView) */
+.print-sheet { display: none; }
+@media print {
+  body > *:not(.print-sheet) { display: none !important; }
+  html, body { background: white !important; height: auto; }
+  .print-sheet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6mm;
+    height: 100vh;
+    break-inside: avoid;
+  }
+  .print-sheet img { max-width: 100%; max-height: calc(100vh - 34mm); object-fit: contain; } /* 34 mm: PAGE.name */
+  /* Name in Umrissbuchstaben – zum Ausmalen */
+  .print-sheet .print-name {
+    font-family: var(--font-display);
+    font-size: 54pt;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    color: white;
+    -webkit-text-stroke: 2.5px black;
+    paint-order: stroke fill;
+  }
+}
+
 /* Spiele: Konfetti und Lichtstrahlen bei der 100 (CSS statt JS – läuft flüssig auf dem Fire-Tablet) */
 .confetti {
   position: absolute;

@@ -180,6 +180,31 @@ export function Crayon({ className }: P) {
   );
 }
 
+/** Drucker */
+export function Printer({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="5" strokeLinejoin="round">
+      <path d="M18 24V8h28v16" />
+      <rect x="6" y="24" width="52" height="22" rx="5" fill="currentColor" fillOpacity="0.15" />
+      <path d="M18 38h28v18H18z" fill="white" />
+      <path d="M24 46h16M24 51h10" strokeLinecap="round" strokeWidth="3.5" />
+    </svg>
+  );
+}
+
+/** Blatt mit Umriss-Pokéball: Ausmalbild */
+export function ColoringPage({ className }: P) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinejoin="round">
+      <path d="M12 6h28l12 12v40H12z" fill="white" />
+      <path d="M40 6v12h12" />
+      <circle cx="32" cy="38" r="11" />
+      <path d="M21 38h22" />
+      <circle cx="32" cy="38" r="3.5" fill="white" />
+    </svg>
+  );
+}
+
 /** Lupe: Suche */
 export function Magnifier({ className }: P) {
   return (

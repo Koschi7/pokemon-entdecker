@@ -8,6 +8,11 @@
 
 ### 2026-11-01
 
+**Ausmalbilder zum Drucken**
+- Aus jedem Pokémon (auch Formen und Megas) wird ein Ausmalbild: kräftiger Umriss, Linien an den Farbgrenzen, dunkle Flächen nur umrandet
+- Im Ausmal-Helfer umschalten zwischen „Farbig“ und „Ausmalbild“, „Drucken“ gibt ein A4-Blatt mit dem Namen in Umrissbuchstaben aus
+- Hoch- oder Querformat wählt die App pro Pokémon – je nachdem, wo es größer aufs Blatt passt
+
 **Suche**
 - Neuer Knopf „Suchen“ oben rechts: sucht in allen Generationen, auch Regionalformen und Megas, Vorschläge ab dem ersten Buchstaben als Bilder zum Antippen
 - Verzeiht Tippfehler beim Buchstabieren nach Gehör („Glurack“, „Pikatschu“, „Samasenta“) und findet auch englische Namen
@@ -162,6 +167,11 @@
 ## English
 
 ### 2026-11-01
+
+**Printable coloring pages**
+- Every Pokémon (including forms and Megas) becomes a coloring page: bold outline, lines at color boundaries, dark areas outlined instead of filled
+- The coloring helper switches between "Farbig" and "Ausmalbild"; "Drucken" prints an A4 page with the name in outline letters
+- Portrait or landscape per Pokémon, whichever prints it larger
 
 **Search**
 - New "Suchen" button at the top right: searches all generations including regional forms and Megas, with picture suggestions from the first letter

@@ -15,8 +15,9 @@ const hookRules = Object.fromEntries(
 );
 
 export default defineConfig([
-  // Build output, pipeline cache/assets, local experiments, agent worktrees and leftovers of the old v2 app
-  globalIgnores(['dist/', 'generated/', '.cache/', 'scratch/', 'app/', 'venv/', '.claude/']),
+  // Build output, pipeline cache/assets, the line-art Python venv, local experiments, agent worktrees
+  // and leftovers of the old v2 app
+  globalIgnores(['dist/', 'generated/', '.cache/', '.venv/', 'scratch/', 'app/', 'venv/', '.claude/']),
 
   {
     files: ['**/*.{js,ts,tsx}'],

@@ -1,5 +1,6 @@
 // Ausmal-Helfer: Das Pokémon groß auf "Papier", daneben die Stifte, die man dafür braucht. Tippt das Kind
 // auf einen Stift, sagt Puck die Farbe. Mit zwei Fingern (oder Doppeltipp) lässt sich hineinzoomen.
+// Umschaltbar auf das Ausmalbild (nur Linien), das sich als A4-Blatt drucken lässt.
 // Der Bildschirm bleibt an, solange die Ansicht offen ist.
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -7,9 +8,10 @@ import { motion } from 'motion/react';
 import { asset } from '../data/assets';
 import { crayonFragment, crayonIndex, crayonShares, oklch, withoutOutlines, type CrayonKey, type CrayonShare } from '../data/crayons';
 import type { strings } from '../data/labels';
+import { pageOrientation, type Orientation } from '../data/print';
 import { play } from '../lib/audio';
 import { sfx } from '../lib/sfx';
-import { Close, Shrink, Speaker } from './icons';
+import { Close, ColoringPage, Printer, Shrink, Speaker } from './icons';
 
 const SAMPLE = 320; // Analyse-Auflösung: genau genug auch für kleine Flächen, schnell auf dem Fire-Tablet
 const MAX_ZOOM = 5;
@@ -221,9 +223,24 @@ function CrayonButton({ crayon, label, onClick }: { crayon: CrayonShare; label: 
   );
 }
 
+/** Das Druckblatt: unsichtbar, bis gedruckt wird (siehe .print-sheet in styles.css). */
+function PrintSheet({ src, name }: { src: string; name: string }) {
+  const [orientation, setOrientation] = useState<Orientation>('portrait');
+  return createPortal(
+    <div className="print-sheet" aria-hidden>
+      <style>{`@page { size: A4 ${orientation}; margin: 12mm; }`}</style>
+      <img src={src} alt="" onLoad={(e) => setOrientation(pageOrientation(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight))} />
+      <div className="print-name">{name}</div>
+    </div>,
+    document.body,
+  );
+}
+
 export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
   const { ui, crayonName } = t;
   const src = asset.art(assetId, shiny);
+  const lineSrc = asset.line(assetId); // Linien gibt es nur vom normalen Artwork – beim Ausmalen egal
+  const [lineMode, setLineMode] = useState(false);
   const crayons = useCrayons(src);
   const { stage: stageRef, content: contentRef, zoomed, reset } = usePinchZoom();
   useWakeLock();
@@ -248,7 +265,7 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
       <div ref={stageRef} className="relative min-h-0 min-w-0 flex-1 touch-none overflow-hidden">
         <div className="absolute inset-0 grid place-items-center p-4 [container-type:size] short:p-2">
           <div ref={contentRef} className="relative size-[min(100cqw,100cqh)] will-change-transform">
-            <img src={src} alt={name} draggable={false} className="absolute inset-0 size-full object-contain" />
+            <img src={lineMode ? lineSrc : src} alt={name} draggable={false} className="absolute inset-0 size-full object-contain" />
           </div>
         </div>
 
@@ -266,6 +283,22 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
           >
             {name}
             <Speaker className="size-6 text-dex short:size-5" />
+          </button>
+          <span className="flex-1" />
+          <button
+            onClick={() => { sfx.flip(); setLineMode((m) => !m); }}
+            aria-pressed={lineMode}
+            className={`chunky pointer-events-auto flex h-14 items-center gap-2 rounded-full px-4 text-[16px] font-extrabold short:h-11 short:px-3 short:text-[14px] ${lineMode ? 'bg-sun' : 'bg-white'}`}
+          >
+            <ColoringPage className="size-7 short:size-6" />
+            {lineMode ? ui.colorArt : ui.lineArt}
+          </button>
+          <button
+            onClick={() => { sfx.tap(); window.print(); }}
+            className="chunky pointer-events-auto flex h-14 items-center gap-2 rounded-full bg-ink px-4 text-[16px] font-extrabold text-white short:h-11 short:px-3 short:text-[14px]"
+          >
+            <Printer className="size-7 short:size-6" />
+            {ui.print}
           </button>
         </div>
 
@@ -286,6 +319,7 @@ export function ColoringView({ assetId, shiny, name, onClose, t }: Props) {
           <CrayonButton key={c.key} crayon={c} label={crayonName(c.key)} onClick={() => say(c.key)} />
         ))}
       </aside>
+      <PrintSheet src={lineSrc} name={name} />
     </motion.div>,
     document.body,
   );
