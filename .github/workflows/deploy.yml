@@ -50,9 +50,9 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
         run: |
-          # --delete never touches excluded paths, so data/, img/ and audio/ on the server stay as they are
+          # --delete never touches excluded paths, so data/, img/, audio/ and print/ on the server stay as they are
           rsync -az --delete \
-            --exclude /data/ --exclude /img/ --exclude /audio/ \
+            --exclude /data/ --exclude /img/ --exclude /audio/ --exclude /print/ \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
             dist/ "$DEPLOY_HOST:/var/www/pokemon-entdecker/"
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_HOST" \

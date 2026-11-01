@@ -14,7 +14,7 @@ sie liegen nie im Repo, sondern werden lokal gebaut und separat hochgeladen.
 
 ```bash
 pnpm build
-rsync -az --delete --exclude data/ --exclude img/ --exclude audio/ dist/ root@49.12.43.239:/var/www/pokemon-entdecker/
+rsync -az --delete --exclude data/ --exclude img/ --exclude audio/ --exclude print/ dist/ root@49.12.43.239:/var/www/pokemon-entdecker/
 ssh root@49.12.43.239 'chown -R www-data:www-data /var/www/pokemon-entdecker'
 ```
 
@@ -22,7 +22,8 @@ ssh root@49.12.43.239 'chown -R www-data:www-data /var/www/pokemon-entdecker'
 
 Der Workflow **Deploy** (`.github/workflows/deploy.yml`, nur manuell: *Actions → Deploy → Run workflow*)
 baut die App und macht genau dasselbe: `rsync` von `dist/` nach `/var/www/pokemon-entdecker/` ohne
-`data/`, `img/` und `audio/`, danach `chown -R www-data:www-data`. Daten, Bilder und Audio lädt er nie hoch.
+`data/`, `img/`, `audio/` und `print/`, danach `chown -R www-data:www-data`. Daten, Bilder, Audio und
+Druckaufträge lädt er nie hoch – und dank der Ausnahmen löscht `--delete` sie auch nicht.
 
 Benötigte Secrets – muss der Owner einmalig unter *Settings → Secrets and variables → Actions* im
 GitHub-Repo anlegen:
