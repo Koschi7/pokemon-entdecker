@@ -100,6 +100,7 @@ To check pronunciation, run `pnpm review` and open `generated/review/index.html`
 | `pnpm review` | Build `generated/review/index.html` for checking pronunciation |
 | `pnpm lineart` | Turn every artwork into a coloring page (OpenCV; only missing ones, `--force` for all) |
 | `pnpm printsheets` | Render each coloring page as an A4 sheet and wrap it in an IPP print job (`generated/print/`) |
+| `pnpm story <file.md>` | Voice a bedtime story (Markdown with `## Kapitel` sections) in one Gemini request and split it into chapters for a Creative Tonie (`pipeline/story_split.py`, faster-whisper; `pip install -r pipeline/requirements-story.txt`). Stories live in `generated/stories/` and are never committed |
 
 ## Deployment
 

@@ -21,13 +21,17 @@ function apiKey(): string {
 
 type Response = { candidates?: Array<{ content?: { parts?: Array<{ inlineData?: { data: string; mimeType?: string } }> } }> };
 
-export async function synthesize(model: string, voice: string, text: string, wavOut: string): Promise<void> {
+/** temperature: kleiner = gleichmäßigerer Vortrag (Standard der API: 1) */
+export async function synthesize(
+  model: string, voice: string, text: string, wavOut: string, options: { temperature?: number } = {},
+): Promise<void> {
   const res = await fetch(`${API}/models/${model}:generateContent`, {
     method: 'POST',
     headers: { 'x-goog-api-key': apiKey(), 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text }] }],
       generationConfig: {
+        ...(options.temperature !== undefined ? { temperature: options.temperature } : {}),
         responseModalities: ['AUDIO'],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
       },

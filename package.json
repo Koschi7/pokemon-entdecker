@@ -16,7 +16,8 @@
     "tts": "tsx pipeline/tts.ts",
     "review": "tsx pipeline/review.ts",
     "lineart": ".venv/bin/python pipeline/lineart.py",
-    "printsheets": ".venv/bin/python pipeline/printsheet.py"
+    "printsheets": ".venv/bin/python pipeline/printsheet.py",
+    "story": "tsx pipeline/story.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
