@@ -6,6 +6,12 @@
 
 ## Deutsch
 
+### 2026-11-02
+
+**Gutenachtgeschichten (Werkzeug, nicht in der App)**
+- `pnpm story` vertont eine eigene Pokémon-Geschichte in einem Stück und teilt sie in Kapitel für einen Kreativ-Tonie – gleichmäßige Stimme, gleich laute Kapitel
+- Bricht ab, wenn Gemini vor dem Ende der Geschichte aufhört, und legt ein Transkript zum Abgleich mit dem Text ab
+
 ### 2026-11-01
 
 **Ausmalbilder zum Drucken**
@@ -170,6 +176,12 @@
 ---
 
 ## English
+
+### 2026-11-02
+
+**Bedtime stories (tooling, not in the app)**
+- `pnpm story` voices a custom Pokémon story in one go and splits it into chapters for a Creative Tonie – consistent voice, equally loud chapters
+- Stops if Gemini ends before the story does, and saves a transcript to compare against the text
 
 ### 2026-11-01
 

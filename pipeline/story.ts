@@ -69,8 +69,9 @@ async function main() {
 
   const spoken = chapters.map((c, i) => `${i === 0 ? `${title}. ` : ''}${spokenHeading(c.title)}\n\n${c.text}`);
   const wav = join(outDir, 'ganz.wav');
+  let finish: string | undefined;
   try {
-    await synthesize(MODEL, args.voice!, `${STYLE}\n\n${spoken.join('\n\n')}`, wav, { temperature: TEMPERATURE });
+    finish = await synthesize(MODEL, args.voice!, `${STYLE}\n\n${spoken.join('\n\n')}`, wav, { temperature: TEMPERATURE });
   } catch (err) {
     if (err instanceof QuotaExceeded) {
       console.log('Tageslimit von Gemini erreicht – später nochmal starten.');
@@ -78,7 +79,11 @@ async function main() {
     }
     throw err;
   }
-  await appendFile('generated/audio/de/requests.log', `${new Date().toISOString()} ok story ${basename(file)} (ganz)\n`);
+  await appendFile('generated/audio/de/requests.log', `${new Date().toISOString()} ok story ${basename(file)} (ganz, ${finish})\n`);
+  if (finish && finish !== 'STOP') {
+    // zu lang für eine Anfrage: Geschichte kürzen oder in zwei Hälften vertonen
+    throw new Error(`Gemini hat vor dem Ende aufgehört (${finish}) – Aufnahme liegt in ${wav}`);
+  }
 
   const { stdout } = await run('.venv/bin/python', ['pipeline/story_split.py', wav, outDir, String(chapters.length), title]);
   process.stdout.write(stdout);

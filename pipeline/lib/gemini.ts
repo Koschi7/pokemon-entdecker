@@ -19,12 +19,15 @@ function apiKey(): string {
   return key;
 }
 
-type Response = { candidates?: Array<{ content?: { parts?: Array<{ inlineData?: { data: string; mimeType?: string } }> } }> };
+type Response = {
+  candidates?: Array<{ finishReason?: string; content?: { parts?: Array<{ inlineData?: { data: string; mimeType?: string } }> } }>;
+};
 
-/** temperature: kleiner = gleichmäßigerer Vortrag (Standard der API: 1) */
+/** temperature: kleiner = gleichmäßigerer Vortrag (Standard der API: 1).
+ *  Gibt den finishReason zurück – "MAX_TOKENS" heißt: Die Aufnahme bricht vor dem Ende des Textes ab. */
 export async function synthesize(
   model: string, voice: string, text: string, wavOut: string, options: { temperature?: number } = {},
-): Promise<void> {
+): Promise<string | undefined> {
   const res = await fetch(`${API}/models/${model}:generateContent`, {
     method: 'POST',
     headers: { 'x-goog-api-key': apiKey(), 'Content-Type': 'application/json' },
@@ -40,13 +43,14 @@ export async function synthesize(
   if (res.status === 429) throw new QuotaExceeded(await res.text());
   if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0, 500)}`);
 
-  const part = ((await res.json()) as Response).candidates?.[0]?.content?.parts?.[0]?.inlineData;
+  const candidate = ((await res.json()) as Response).candidates?.[0];
+  const part = candidate?.content?.parts?.[0]?.inlineData;
   if (!part) throw new Error('Gemini: keine Audiodaten in der Antwort');
   const bytes = Buffer.from(part.data, 'base64');
   const mime = part.mimeType ?? '';
   if (mime.includes('wav')) {
     await writeFile(wavOut, bytes);
-    return;
+    return candidate?.finishReason;
   }
   // rohes PCM, z. B. "audio/L16;codec=pcm;rate=24000"
   const rate = mime.match(/rate=(\d+)/)?.[1] ?? '24000';
@@ -54,4 +58,5 @@ export async function synthesize(
   await writeFile(pcm, bytes);
   await run('ffmpeg', ['-y', '-loglevel', 'error', '-f', 's16le', '-ar', rate, '-ac', '1', '-i', pcm, wavOut]);
   await unlink(pcm);
+  return candidate?.finishReason;
 }

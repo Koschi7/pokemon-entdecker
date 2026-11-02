@@ -5,7 +5,8 @@
 Gemini liest die Sprechanweisung am Anfang mit vor. Eine Spracherkennung (faster-whisper, lokal) liefert
 Zeitstempel für jedes Wort: Die Geschichte beginnt beim Titel direkt vor dem ersten "Kapitel", jedes
 weitere Kapitel beim nächsten "Kapitel". Lautstärke wird für die ganze Geschichte gemeinsam angeglichen,
-damit alle Kapitel gleich laut sind. Ergebnis: 01.mp3, 02.mp3, … im Zielordner.
+damit alle Kapitel gleich laut sind. Ergebnis: 01.mp3, 02.mp3, … im Zielordner, dazu transkript.txt
+(was die Spracherkennung gehört hat – zum Abgleich mit dem Text).
 """
 
 import re
@@ -24,7 +25,10 @@ def main() -> None:
     model = WhisperModel('small', device='cpu', compute_type='int8')
     segments, info = model.transcribe(wav, language='de', beam_size=3, word_timestamps=True,
                                       condition_on_previous_text=False)
-    words = [(fold(w.word), w.start) for s in segments for w in s.words]
+    heard = [w for s in segments for w in s.words]
+    words = [(fold(w.word), w.start) for w in heard]
+    with open(f'{out_dir}/transkript.txt', 'w') as f:
+        f.write(''.join(w.word for w in heard).strip() + '\n')
 
     chapters = [i for i, (w, _) in enumerate(words) if w.startswith('kapitel')]
     if len(chapters) != count:
@@ -49,6 +53,7 @@ def main() -> None:
                         '-c:a', 'libmp3lame', '-b:a', '112k', f'{out_dir}/{n + 1:02d}.mp3'], check=True)
         print(f'  {n + 1:02d}.mp3  {(b - a) / 60:.1f} min')
     print(f'  Anweisung bis {cuts[0]:.1f} s abgeschnitten')
+    print(f'  Ende: …{"".join(w.word for w in heard[-8:])}')
 
 
 if __name__ == '__main__':
