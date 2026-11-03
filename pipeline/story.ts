@@ -1,27 +1,27 @@
-// Gutenachtgeschichten für den Kreativ-Tonie: liest eine Geschichte als Markdown ("# Titel", "## Kapitel …"),
-// vertont sie mit Gemini in EINER Anfrage (sonst klingt jedes Kapitel ein bisschen anders) und teilt die
-// Aufnahme danach in Kapitel (pipeline/story_split.py) – auf dem Tonie wird daraus je ein Kapitel.
+// Geschichten für den Kreativ-Tonie: liest eine Geschichte als Markdown ("# Titel", "## Kapitel …") und vertont
+// sie kapitelweise mit Gemini – auf dem Tonie wird daraus je ein Kapitel. Die Sprechweise steht als eigene Angabe an
+// jedem Absatz (Interactions-API): So wird sie nicht mitgelesen, und die Stimme dreht zum Kapitelende nicht auf –
+// Regieanweisungen im Text lassen sie abdriften. Danach prüft pipeline/story_check.py jedes Kapitel.
 // Die Texte liegen nur lokal (generated/stories/, gitignored): Sie enthalten die Namen der Kinder.
 //
-//   pnpm story generated/stories/01-sternschnuppennacht.md
-//   pnpm story <datei> --force          # neu vertonen, auch wenn es die Kapitel schon gibt
+//   pnpm story generated/stories/04-der-funke-im-apfelgarten.md
+//   pnpm story <datei> --chapter 3      # nur Kapitel 3 (neu) vertonen
+//   pnpm story <datei> --force          # alle Kapitel neu vertonen
 //   pnpm story <datei> --voice Sulafat  # andere Stimme
 //
-// Voraussetzung für das Aufteilen: .venv/bin/pip install -r pipeline/requirements-story.txt
+// Fertige Kapitel werden übersprungen: Nach dem Tageslimit einfach am nächsten Tag denselben Befehl starten.
+// Voraussetzung für die Prüfung: .venv/bin/pip install -r pipeline/requirements-story.txt
 import { execFile } from 'node:child_process';
 import { access, appendFile, mkdir, readFile, unlink } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 import { parseArgs, promisify } from 'node:util';
-import { QuotaExceeded, synthesize } from './lib/gemini.ts';
+import { QuotaExceeded, narrate } from './lib/gemini.ts';
 
 const run = promisify(execFile);
 const MODEL = 'gemini-3.8-flash-tts';
-const TEMPERATURE = 0.5; // gleichmäßiger Vortrag über die ganze Geschichte
-// Gemini liest diese Anweisung mit vor (eine getrennte Systemanweisung lehnt das TTS-Modell ab);
-// story_split.py schneidet sie weg. Sie wirkt trotzdem auf die Sprechweise.
-const STYLE = 'Lies die folgende Gutenachtgeschichte von Anfang bis Ende gleichmäßig ruhig, sanft und leise vor, '
-  + 'mit kleinen Pausen zwischen den Sätzen. Auch bei wörtlicher Rede und spannenden Stellen bleibt die Stimme '
-  + 'weich und gemütlich:';
+const TEMPERATURE = 0.5; // gleichmäßiger Vortrag
+// kurz halten und an jedem Absatz gleich lassen – längere Anweisungen lassen die Stimme laut Google abdriften
+const STYLE = 'ruhig und warm erzählend, wie beim Vorlesen eines Kinderhörspiels, gleichmäßiges, eher langsames Tempo';
 const NUMBERS = ['eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn'];
 
 const { values: args, positionals } = parseArgs({
@@ -29,17 +29,19 @@ const { values: args, positionals } = parseArgs({
   options: {
     voice: { type: 'string', default: 'Achernar' },
     force: { type: 'boolean', default: false },
+    chapter: { type: 'string' },
   },
 });
 
-type Chapter = { title: string; text: string };
+type Chapter = { title: string; paragraphs: string[] };
 
-/** "# Titel" und "## Kapitel 1: …"-Abschnitte */
+/** "# Titel" und "## Kapitel 1: …"-Abschnitte, Absätze getrennt durch Leerzeilen */
 function parse(markdown: string): { title: string; chapters: Chapter[] } {
   const title = markdown.match(/^# (.+)$/m)?.[1]?.trim() ?? 'Geschichte';
   const chapters = markdown.split(/^## /m).slice(1).map((block) => {
     const [heading = '', ...body] = block.split('\n');
-    return { title: heading.trim(), text: body.join('\n').trim() };
+    const paragraphs = body.join('\n').split(/\n\s*\n/).map((p) => p.replace(/\s*\n\s*/g, ' ').trim()).filter(Boolean);
+    return { title: heading.trim(), paragraphs };
   });
   return { title, chapters };
 }
@@ -60,35 +62,37 @@ async function main() {
   if (!file) throw new Error('Aufruf: pnpm story <geschichte.md>');
   const { title, chapters } = parse(await readFile(file, 'utf8'));
   const outDir = join(dirname(file), basename(file, '.md'));
+  const only = args.chapter ? Number(args.chapter) : undefined;
   await mkdir(outDir, { recursive: true });
-  if (!args.force && (await exists(join(outDir, '01.mp3')))) {
-    console.log(`${outDir} gibt es schon – mit --force neu vertonen`);
-    return;
-  }
-  console.log(`${title}: ${chapters.length} Kapitel, Stimme ${args.voice}, eine Anfrage`);
+  console.log(`${title}: ${chapters.length} Kapitel, Stimme ${args.voice}`);
 
-  const spoken = chapters.map((c, i) => `${i === 0 ? `${title}. ` : ''}${spokenHeading(c.title)}\n\n${c.text}`);
-  const wav = join(outDir, 'ganz.wav');
-  let finish: string | undefined;
-  try {
-    finish = await synthesize(MODEL, args.voice!, `${STYLE}\n\n${spoken.join('\n\n')}`, wav, { temperature: TEMPERATURE });
-  } catch (err) {
-    if (err instanceof QuotaExceeded) {
-      console.log('Tageslimit von Gemini erreicht – später nochmal starten.');
-      return;
+  for (const [i, chapter] of chapters.entries()) {
+    const nn = String(i + 1).padStart(2, '0');
+    const mp3 = join(outDir, `${nn}.mp3`);
+    if (only !== undefined && i + 1 !== only) continue;
+    if (only === undefined && !args.force && (await exists(mp3))) continue;
+
+    const heading = `${i === 0 ? `${title}. ` : ''}${spokenHeading(chapter.title)} <long pause>`;
+    const wav = join(outDir, `${nn}.wav`);
+    try {
+      await narrate(MODEL, args.voice!, [heading, ...chapter.paragraphs], STYLE, wav, { temperature: TEMPERATURE });
+    } catch (err) {
+      if (err instanceof QuotaExceeded) {
+        console.log('Tageslimit von Gemini erreicht – morgen denselben Befehl starten, fertige Kapitel bleiben.');
+        return;
+      }
+      throw err;
     }
-    throw err;
-  }
-  await appendFile('generated/audio/de/requests.log', `${new Date().toISOString()} ok story ${basename(file)} (ganz, ${finish})\n`);
-  if (finish && finish !== 'STOP') {
-    // zu lang für eine Anfrage: Geschichte kürzen oder in zwei Hälften vertonen
-    throw new Error(`Gemini hat vor dem Ende aufgehört (${finish}) – Aufnahme liegt in ${wav}`);
+    await appendFile('generated/audio/de/requests.log', `${new Date().toISOString()} ok story ${basename(file)} Kapitel ${i + 1}\n`);
+    // gleiche Lautheit für alle Kapitel, 1 s Ruhe davor und 2 s danach
+    await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', wav, '-af', 'loudnorm=I=-21:TP=-2:LRA=11,adelay=1000:all=1,apad=pad_dur=2',
+      '-ac', '1', '-ar', '44100', '-c:a', 'libmp3lame', '-b:a', '112k', mp3]);
+    await unlink(wav);
+    console.log(`  ${nn}.mp3  ${chapter.title}`);
   }
 
-  const { stdout } = await run('.venv/bin/python', ['pipeline/story_split.py', wav, outDir, String(chapters.length), title]);
+  const { stdout } = await run('.venv/bin/python', ['pipeline/story_check.py', file, outDir], { maxBuffer: 1 << 24 });
   process.stdout.write(stdout);
-  await unlink(wav);
-  await unlink(`${wav}.norm.wav`);
 }
 
 await main();

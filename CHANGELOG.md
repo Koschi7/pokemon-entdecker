@@ -6,6 +6,13 @@
 
 ## Deutsch
 
+### 2026-11-03
+
+**Geschichten für den Kreativ-Tonie (Werkzeug, nicht in der App)**
+- Vertont jetzt Kapitel für Kapitel über die neue Interactions-API von Gemini: Die Sprechweise hängt als eigene Angabe an jedem Absatz, wird nicht mehr mitgelesen und lässt die Stimme nicht mehr zum Kapitelende aufdrehen
+- Einzelne Kapitel lassen sich neu vertonen (`--chapter`), fertige werden übersprungen – nach dem Tageslimit geht es am nächsten Tag weiter
+- Neue Prüfung je Kapitel: fehlt Text, ist das Tempo zu hoch, steigt die Stimme zum Ende an?
+
 ### 2026-11-02
 
 **Gutenachtgeschichten (Werkzeug, nicht in der App)**
@@ -176,6 +183,13 @@
 ---
 
 ## English
+
+### 2026-11-03
+
+**Stories for the Creative Tonie (tooling, not in the app)**
+- Now voiced chapter by chapter through Gemini's new Interactions API: the speaking style is a separate annotation on every paragraph, is no longer read aloud and no longer makes the voice rise toward the end of a chapter
+- Single chapters can be re-voiced (`--chapter`), finished ones are skipped – after the daily limit it continues the next day
+- New check per chapter: missing text, pace too high, voice rising toward the end?
 
 ### 2026-11-02
 

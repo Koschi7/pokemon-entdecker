@@ -60,3 +60,40 @@ export async function synthesize(
   await unlink(pcm);
   return candidate?.finishReason;
 }
+
+type Interaction = {
+  status?: string;
+  steps?: Array<{ type: string; content?: Array<{ type: string; data?: string }> }>;
+};
+
+/** Interactions-API für längere Erzählungen: jeder Absatz trägt dieselbe Sprechweise als eigene Angabe.
+ *  Die wird nicht vorgelesen, und die Stimme driftet nicht ab wie bei Regieanweisungen im Text.
+ *  Im Text gehen Pausen wie "<long pause>". Ergebnis: WAV, 24 kHz mono. */
+export async function narrate(
+  model: string, voice: string, paragraphs: string[], style: string, wavOut: string, options: { temperature?: number } = {},
+): Promise<void> {
+  const res = await fetch(`${API}/interactions`, {
+    method: 'POST',
+    headers: { 'x-goog-api-key': apiKey(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model,
+      input: [{
+        type: 'user_input',
+        content: paragraphs.map((text) => ({ type: 'text', text, annotations: [{ type: 'speech_metadata', style }] })),
+      }],
+      response_format: { type: 'audio' },
+      generation_config: {
+        ...(options.temperature !== undefined ? { temperature: options.temperature } : {}),
+        speech_config: [{ voice }],
+      },
+    }),
+  });
+  if (res.status === 429) throw new QuotaExceeded(await res.text());
+  if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0, 500)}`);
+
+  const interaction = (await res.json()) as Interaction;
+  if (interaction.status !== 'completed') throw new Error(`Gemini: Aufnahme unvollständig (${interaction.status})`);
+  const audio = interaction.steps?.find((s) => s.type === 'model_output')?.content?.find((c) => c.type === 'audio');
+  if (!audio?.data) throw new Error('Gemini: keine Audiodaten in der Antwort');
+  await writeFile(wavOut, Buffer.from(audio.data, 'base64'));
+}
