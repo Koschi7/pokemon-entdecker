@@ -6,6 +6,11 @@
 
 ## Deutsch
 
+### 2026-11-05
+
+**Geschichten für den Kreativ-Tonie (Werkzeug)**
+- `pnpm story` legt die fertigen Kapitel gleich mit Titeln für die Tonie-App ab (Ordner „Tonie – <Titel>“, Kurzname mit `--name`)
+
 ### 2026-11-03
 
 **Geschichten für den Kreativ-Tonie (Werkzeug, nicht in der App)**
@@ -183,6 +188,11 @@
 ---
 
 ## English
+
+### 2026-11-05
+
+**Stories for the Creative Tonie (tooling)**
+- `pnpm story` now exports the finished chapters with titles for the Tonie app (folder "Tonie – <title>", short name via `--name`)
 
 ### 2026-11-03
 

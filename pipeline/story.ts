@@ -8,8 +8,10 @@
 //   pnpm story <datei> --chapter 3      # nur Kapitel 3 (neu) vertonen
 //   pnpm story <datei> --force          # alle Kapitel neu vertonen
 //   pnpm story <datei> --voice Sulafat  # andere Stimme
+//   pnpm story <datei> --name Fukano    # Kurzname in den Tonie-Titeln ("Fukano 4 – Geowaz")
 //
 // Fertige Kapitel werden übersprungen: Nach dem Tageslimit einfach am nächsten Tag denselben Befehl starten.
+// Sind alle Kapitel da, landen sie mit Titeln (ID3) im Ordner "Tonie – <Titel>" – so in die Tonie-App ziehen.
 // Voraussetzung für die Prüfung: .venv/bin/pip install -r pipeline/requirements-story.txt
 import { execFile } from 'node:child_process';
 import { access, appendFile, mkdir, readFile, unlink } from 'node:fs/promises';
@@ -30,6 +32,7 @@ const { values: args, positionals } = parseArgs({
     voice: { type: 'string', default: 'Achernar' },
     force: { type: 'boolean', default: false },
     chapter: { type: 'string' },
+    name: { type: 'string' },
   },
 });
 
@@ -93,6 +96,22 @@ async function main() {
 
   const { stdout } = await run('.venv/bin/python', ['pipeline/story_check.py', file, outDir], { maxBuffer: 1 << 24 });
   process.stdout.write(stdout);
+
+  const mp3s = chapters.map((_, i) => join(outDir, `${String(i + 1).padStart(2, '0')}.mp3`));
+  if ((await Promise.all(mp3s.map(exists))).every(Boolean)) await exportForTonie(title, chapters, mp3s, dirname(file));
+}
+
+/** "Tonie – <Titel>/04 Fukano 4 – Geowaz.mp3": Dateiname und ID3-Titel sind das, was die Tonie-App anzeigt */
+async function exportForTonie(title: string, chapters: Chapter[], mp3s: string[], storiesDir: string) {
+  const dir = join(storiesDir, `Tonie – ${title}`);
+  await mkdir(dir, { recursive: true });
+  for (const [i, chapter] of chapters.entries()) {
+    const name = `${args.name ?? title} ${i + 1} – ${chapter.title.replace(/^Kapitel \d+:\s*/, '')}`;
+    await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', mp3s[i]!, '-c', 'copy', '-map_metadata', '-1', '-id3v2_version', '3',
+      '-metadata', `title=${name}`, '-metadata', `track=${i + 1}`, '-metadata', 'album=Pokémon-Geschichten',
+      join(dir, `${String(i + 1).padStart(2, '0')} ${name}.mp3`)]);
+  }
+  console.log(`  Für den Tonie: ${dir}`);
 }
 
 await main();
